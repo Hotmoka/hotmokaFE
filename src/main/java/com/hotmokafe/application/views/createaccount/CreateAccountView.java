@@ -56,7 +56,7 @@ public class CreateAccountView extends Div {
 
             if (firstName.getValue().length() != 0 && lastName.getValue().length() != 0 && birthDate.getValue() != null){
                 dialog.add(new Text(CreateAccount.Run(
-                        new Person(firstName + " " + lastName, birthDate.getValue().getDayOfMonth(),
+                        new Person(firstName.getValue() + " " + lastName.getValue(), birthDate.getValue().getDayOfMonth(),
                                 birthDate.getValue().getMonth().getValue(), birthDate.getValue().getYear())
                         ))
                 );
