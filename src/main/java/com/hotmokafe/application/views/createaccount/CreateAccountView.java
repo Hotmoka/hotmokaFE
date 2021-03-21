@@ -1,14 +1,13 @@
 package com.hotmokafe.application.views.createaccount;
 
 import com.hotmokafe.application.blockchain.CreateAccount;
+import com.hotmokafe.application.entities.Person;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -24,9 +23,9 @@ import java.security.NoSuchAlgorithmException;
 @PageTitle("Create Account")
 @CssImport("./views/about/about-view.css")
 public class CreateAccountView extends Div {
-    private VerticalLayout mainLayout;
-    private FormLayout layoutWithFormItems;
-    private Button button;
+    private final VerticalLayout mainLayout;
+    private final FormLayout layoutWithFormItems;
+    private final Button button;
 
     public CreateAccountView() {
         mainLayout = new VerticalLayout();
@@ -41,10 +40,6 @@ public class CreateAccountView extends Div {
         lastName.setPlaceholder("Cognome");
         lastName.setSizeFull();
 
-        TextField phone = new TextField();
-        phone.setSizeFull();
-        TextField email = new TextField();
-        email.setSizeFull();
         DatePicker birthDate = new DatePicker();
         birthDate.setSizeFull();
 
@@ -52,15 +47,22 @@ public class CreateAccountView extends Div {
         layoutWithFormItems.addFormItem(lastName, "Cognome");
 
         layoutWithFormItems.addFormItem(birthDate, "Data di nascita");
-        layoutWithFormItems.addFormItem(email, "E-mail");
 
         mainLayout.add(layoutWithFormItems);
 
         button = new Button("Crea");
         button.addClickListener(e -> {
             Dialog dialog = new Dialog();
-            dialog.add(new Text(CreateAccount.Run()));
-            dialog.open();
+
+            if (firstName.getValue().length() != 0 && lastName.getValue().length() != 0 && birthDate.getValue() != null){
+                dialog.add(new Text(CreateAccount.Run(
+                        new Person(firstName + " " + lastName, birthDate.getValue().getDayOfMonth(),
+                                birthDate.getValue().getMonth().getValue(), birthDate.getValue().getYear())
+                        ))
+                );
+
+                dialog.open();
+            }
         });
 
         mainLayout.add(button);

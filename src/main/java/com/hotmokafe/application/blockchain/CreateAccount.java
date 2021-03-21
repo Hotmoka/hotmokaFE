@@ -1,10 +1,6 @@
 package com.hotmokafe.application.blockchain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.hotmoka.beans.CodeExecutionException;
-import io.hotmoka.beans.TransactionException;
-import io.hotmoka.beans.TransactionRejectedException;
+import com.hotmokafe.application.entities.Person;
 import io.hotmoka.beans.requests.ConstructorCallTransactionRequest;
 import io.hotmoka.beans.requests.InstanceMethodCallTransactionRequest;
 import io.hotmoka.beans.requests.SignedTransactionRequest;
@@ -24,15 +20,11 @@ import io.hotmoka.nodes.views.NodeWithJars;
 import io.hotmoka.tendermint.TendermintBlockchain;
 import io.hotmoka.tendermint.TendermintBlockchainConfig;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 
 import static io.hotmoka.beans.Coin.panarea;
 import static io.hotmoka.beans.types.BasicTypes.INT;
@@ -43,7 +35,7 @@ public class CreateAccount {
     public final static BigInteger RED_AMOUNT = BigInteger.ZERO;
     private final static ClassType PERSON = new ClassType("io.takamaka.family.Person");
 
-    public static String Run()  {
+    public static String Run(Person person) {
         String result = "errore";
 
         TendermintBlockchainConfig config = new TendermintBlockchainConfig.Builder().build();
@@ -79,8 +71,8 @@ public class CreateAccount {
 
             GasHelper gasHelper = new GasHelper(node);
 
-            // call the constructor of Person and store in albert the new object in blockchain
-            StorageReference albert = node.addConstructorCallTransaction
+            // mittente: carico in blockchain
+            StorageReference personStorage = node.addConstructorCallTransaction
                     (new ConstructorCallTransactionRequest(
 
                             // signer on behalf of the first account
@@ -110,9 +102,9 @@ public class CreateAccount {
                             // constructor Person(String,int,int,int)
                             new ConstructorSignature(PERSON, ClassType.STRING, INT, INT, INT),
 
-                            // actual arguments
-                            new StringValue("Albert Einstein"), new IntValue(14),
-                            new IntValue(4), new IntValue(1879)
+                            // parametri
+                            new StringValue(person.getName()), new IntValue(person.getDay()),
+                            new IntValue(person.getMonth()), new IntValue(person.getYear())
                     ));
 
             StorageValue s = node.addInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest(
@@ -144,9 +136,9 @@ public class CreateAccount {
                     new NonVoidMethodSignature(PERSON, "toString", ClassType.STRING),
 
                     // receiver of the method to
-                    albert
+                    personStorage
             ));
-            result = s.toString();
+            result = "Operazione terminata con successo. Account: " + s.toString() + " creato correttamente";
         } catch (Exception e) {
             e.printStackTrace();
         }
