@@ -43,11 +43,16 @@ public class CreateAccount {
     public final static BigInteger RED_AMOUNT = BigInteger.ZERO;
     private final static ClassType PERSON = new ClassType("io.takamaka.family.Person");
 
-    public static String Run() throws NoSuchAlgorithmException {
+    public static String Run()  {
         String result = "errore";
 
         TendermintBlockchainConfig config = new TendermintBlockchainConfig.Builder().build();
-        ConsensusParams consensus = new ConsensusParams.Builder().build();
+        ConsensusParams consensus = null;
+        try {
+            consensus = new ConsensusParams.Builder().build();
+        } catch (NoSuchAlgorithmException e) {
+            return result;
+        }
 
         // the path of the packaged runtime Takamaka classes
         Path takamakaCodePath = Paths.get
