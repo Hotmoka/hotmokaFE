@@ -56,10 +56,10 @@ public class CreateAccount {
 
         // the path of the packaged runtime Takamaka classes
         Path takamakaCodePath = Paths.get
-                ("io-takamaka-code-1.0.0.jar");
+                ("modules/io-takamaka-code-1.0.0.jar");
 
         // the path of the user jar to install
-        Path familyPath = Paths.get("family_exported-0.0.1-SNAPSHOT.jar");
+        Path familyPath = Paths.get("modules/family_exported-0.0.1-SNAPSHOT.jar");
 
         try (Node node = TendermintBlockchain.init(config, consensus)) {
             // first view: store io-takamaka-code-1.0.0.jar and create manifest and gamete
