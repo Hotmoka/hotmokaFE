@@ -17,11 +17,8 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
-import com.hotmokafe.application.views.main.MainView;
-import com.hotmokafe.application.views.about.AboutView;
+import com.hotmokafe.application.views.createaccount.CreateAccountView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.CssImport;
 
@@ -83,7 +80,7 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("About", AboutView.class)};
+        return new Tab[]{createTab("Create Account", CreateAccountView.class)};
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget) {

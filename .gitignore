@@ -16,4 +16,4 @@ drivers/
 error-screenshots/
 webpack.generated.js
 
-chain/
+/chain/

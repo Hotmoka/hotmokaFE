@@ -1,4 +1,4 @@
-package com.hotmokafe.application.views.about;
+package com.hotmokafe.application.views.createaccount;
 
 import com.hotmokafe.application.blockchain.CreateAccount;
 import com.vaadin.flow.component.Text;
@@ -14,11 +14,11 @@ import java.security.NoSuchAlgorithmException;
 
 @Route(value = "about", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
-@PageTitle("About")
+@PageTitle("Create Account")
 @CssImport("./views/about/about-view.css")
-public class AboutView extends Div {
+public class CreateAccountView extends Div {
     private Button button;
-    public AboutView() {
+    public CreateAccountView() {
         addClassName("about-view");
         add(new Text("Content placeholder"));
         add(button = new Button("Crea account"));
