@@ -1,0 +1,25 @@
+I[2021-03-21|18:13:26.975] Version info                                 module=main software=0.32.11 block=10 p2p=7
+I[2021-03-21|18:13:26.981] Starting Node                                module=main impl=Node
+I[2021-03-21|18:13:26.996] Started node                                 module=main nodeInfo="{ProtocolVersion:{P2P:7 Block:10 App:0} ID_:75efb675d840dfc53534d180ccaad27a227d8811 ListenAddr:tcp://0.0.0.0:26656 Network:test-chain-mw4FP3 Version:0.32.11 Channels:4020212223303800 Moniker:DESKTOP-GTKQCJR Other:{TxIndex:on RPCAddress:tcp://127.0.0.1:26657}}"
+I[2021-03-21|18:13:30.458] Executed block                               module=state height=1 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:30.465] Committed state                              module=state height=1 txs=1 appHash=26AE2F7CDC31058B912BEC67AB4DB186681696640C22E9CA226C9790345D8750
+I[2021-03-21|18:13:30.542] Executed block                               module=state height=2 validTxs=0 invalidTxs=0
+I[2021-03-21|18:13:30.555] Committed state                              module=state height=2 txs=0 appHash=26AE2F7CDC31058B912BEC67AB4DB186681696640C22E9CA226C9790345D8750
+I[2021-03-21|18:13:31.590] Executed block                               module=state height=3 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:31.593] Committed state                              module=state height=3 txs=1 appHash=C1BD55CF8378B2E83D71EA279D14F7416065B4C6B72C3CCBFADA3874A262412C
+I[2021-03-21|18:13:32.612] Executed block                               module=state height=4 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:32.615] Committed state                              module=state height=4 txs=1 appHash=8F7605E606AC0E0492C505D6E447C6C07DC684D635C5C8F80F3C7A92180EB1DB
+I[2021-03-21|18:13:33.630] Executed block                               module=state height=5 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:33.633] Committed state                              module=state height=5 txs=1 appHash=51A91D115210187B0DCD5FB950D3196B2C59243EDA80D78B7BB460CA5D118BBB
+I[2021-03-21|18:13:34.714] Executed block                               module=state height=6 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:34.717] Committed state                              module=state height=6 txs=1 appHash=BF27E538407FB534079077E7F896238B96CD963C81F0DA5FCA1F57DC3FDE297D
+I[2021-03-21|18:13:35.754] Executed block                               module=state height=7 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:35.758] Committed state                              module=state height=7 txs=1 appHash=B46A85E29B43A4FE7C0B8ACFDCBBDFAA2E0E7CD9093F78F5B8A7D38641369003
+I[2021-03-21|18:13:36.799] Executed block                               module=state height=8 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:36.806] Committed state                              module=state height=8 txs=1 appHash=51BCF8948F5682F5C6F09E0EF87FD90CD9B4D1A4F3F75181FCB414052E52546D
+I[2021-03-21|18:13:37.763] Executed block                               module=state height=9 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:37.767] Committed state                              module=state height=9 txs=1 appHash=64401186DF7D21014174D4834F734561A9E72888B00AA661FE33A9D6DCCE612B
+I[2021-03-21|18:13:38.771] Executed block                               module=state height=10 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:38.774] Committed state                              module=state height=10 txs=1 appHash=E37EC50D1AA2BAD752E0EF98682111551631E27652DC0023FC4AD2F11C2065E0
+I[2021-03-21|18:13:39.763] Executed block                               module=state height=11 validTxs=1 invalidTxs=0
+I[2021-03-21|18:13:39.768] Committed state                              module=state height=11 txs=1 appHash=49B1BC894AAF0F1E48523E340E0A601958EEBF48616B2488E54CA45CA2D0FD66
