@@ -68,13 +68,17 @@ public class CreateAccountView extends Div {
 
         button = new Button("Crea");
         button.addClickListener(e -> {
+            CreateAccount create;
+            Dialog dialog = new Dialog();
             try{
                 if (useDefaultURL.getValue())
-                    new CreateAccount(payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue()).run();
+                    (create = new CreateAccount(payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue())).run();
                 else
-                    new CreateAccount(URLField.getValue(),payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue()).run();
+                    (create = new CreateAccount(URLField.getValue(),payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue())).run();
+
+                dialog.add(new Text("A new account " + create.getOutcome() + " has been created"));
+                dialog.open();
             } catch (CommandException exception){
-                Dialog dialog = new Dialog();
                 dialog.add(new Text("Errore eccezione generata: " +  exception.getCause().getMessage()));
                 dialog.open();
             }

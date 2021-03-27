@@ -56,7 +56,18 @@ public class CreateAccount extends AbstractCommand {
     //"runs in non-interactive mode"
     private boolean nonInteractive;
 
+    //output
+    private String outcome;
+
     private CreateAccount() {
+    }
+
+    public String getOutcome() {
+        return outcome;
+    }
+
+    public void setOutcome(String outcome) {
+        this.outcome = outcome;
     }
 
     public CreateAccount(String url, String payer, String balance, String balanceRed, boolean nonInteractive) throws CommandException {
@@ -81,7 +92,7 @@ public class CreateAccount extends AbstractCommand {
 
     @Override
     protected void execute() throws Exception {
-        new Run();
+        this.setOutcome(new Run().getOutcome());
     }
 
     private class Run {
@@ -108,13 +119,12 @@ public class CreateAccount extends AbstractCommand {
                 nonceHelper = new NonceHelper(node);
                 gasHelper = new GasHelper(node);
                 account = createAccount();
-                printOutcome();
                 dumpKeysOfAccount();
             }
         }
 
-        private void printOutcome() {
-            System.out.println("A new account " + account + " has been created");
+        public String getOutcome() {
+            return account.toString();
         }
 
         private void dumpKeysOfAccount() throws FileNotFoundException, IOException {
