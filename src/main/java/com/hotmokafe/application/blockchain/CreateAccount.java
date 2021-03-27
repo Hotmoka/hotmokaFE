@@ -1,137 +1,185 @@
 package com.hotmokafe.application.blockchain;
 
 import com.hotmokafe.application.entities.Person;
+import com.hotmokafe.application.utils.StringUtils;
+import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.requests.ConstructorCallTransactionRequest;
 import io.hotmoka.beans.requests.InstanceMethodCallTransactionRequest;
 import io.hotmoka.beans.requests.SignedTransactionRequest;
+import io.hotmoka.beans.requests.SignedTransactionRequest.Signer;
+import io.hotmoka.beans.signatures.CodeSignature;
 import io.hotmoka.beans.signatures.ConstructorSignature;
 import io.hotmoka.beans.signatures.NonVoidMethodSignature;
 import io.hotmoka.beans.types.ClassType;
-import io.hotmoka.beans.values.IntValue;
-import io.hotmoka.beans.values.StorageReference;
-import io.hotmoka.beans.values.StorageValue;
-import io.hotmoka.beans.values.StringValue;
+import io.hotmoka.beans.values.*;
+import io.hotmoka.crypto.SignatureAlgorithm;
 import io.hotmoka.nodes.ConsensusParams;
 import io.hotmoka.nodes.GasHelper;
 import io.hotmoka.nodes.Node;
+import io.hotmoka.nodes.NonceHelper;
 import io.hotmoka.nodes.views.InitializedNode;
 import io.hotmoka.nodes.views.NodeWithAccounts;
 import io.hotmoka.nodes.views.NodeWithJars;
+import io.hotmoka.remote.RemoteNode;
 import io.hotmoka.tendermint.TendermintBlockchain;
 import io.hotmoka.tendermint.TendermintBlockchainConfig;
 
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 import static io.hotmoka.beans.Coin.panarea;
 import static io.hotmoka.beans.types.BasicTypes.INT;
 import static java.math.BigInteger.ZERO;
 
-public class CreateAccount {
-    public final static BigInteger GREEN_AMOUNT = BigInteger.valueOf(100_000_000);
-    public final static BigInteger RED_AMOUNT = BigInteger.ZERO;
-    private final static ClassType PERSON = new ClassType("io.takamaka.family.Person");
 
-    public static String Run(Person person) {
-        String result = "errore";
+public class CreateAccount extends AbstractCommand {
 
-        TendermintBlockchainConfig config = new TendermintBlockchainConfig.Builder().build();
-        ConsensusParams consensus;
+    //"the url of the node (without the protocol)"
+    private String url = "ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080";
+
+    //"the reference to the account that pays for the creation, or the string "faucet"
+    private String payer;
+
+    //"the initial balance of the account"
+    private BigInteger balance;
+
+    //"the initial red balance of the account"
+    private BigInteger balanceRed;
+
+    //"runs in non-interactive mode"
+    private boolean nonInteractive;
+
+    //output
+    private String outcome;
+
+    private CreateAccount() {
+    }
+
+    public String getOutcome() {
+        return outcome;
+    }
+
+    public void setOutcome(String outcome) {
+        this.outcome = outcome;
+    }
+
+    public CreateAccount(String url, String payer, String balance, boolean nonInteractive) throws CommandException {
         try {
-            consensus = new ConsensusParams.Builder().build();
-        } catch (NoSuchAlgorithmException e) {
-            return result;
+            if (StringUtils.isValid(url) && StringUtils.isValid(payer)
+                    && StringUtils.isValid(balance)) {
+                this.url = url;
+                this.payer = payer;
+                this.nonInteractive = nonInteractive;
+                this.balance = new BigInteger(balance);
+                this.balanceRed = BigInteger.ZERO;
+            } else
+                throw new CommandException(new IllegalArgumentException("Campi non valorizzati correttamente"));
+        } catch (NumberFormatException e) {
+            throw new CommandException(e);
+        }
+    }
+
+    public CreateAccount(String payer, String balance, boolean nonInteractive) {
+        this("ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080", payer, balance,  nonInteractive);
+    }
+
+    @Override
+    protected void execute() throws Exception {
+        this.setOutcome(new Run().getOutcome());
+    }
+
+    private class Run {
+        private final Node node;
+        private final SignatureAlgorithm<SignedTransactionRequest> signature;
+        private final KeyPair keys;
+        private final String publicKey;
+        private final NonceHelper nonceHelper;
+        private final GasHelper gasHelper;
+        private final StorageReference account;
+        private final StorageReference manifest;
+        private final TransactionReference takamakaCode;
+        private final String chainId;
+
+        private Run() throws Exception {
+            try (Node node = this.node = RemoteNode.of(remoteNodeConfig(url))) {
+                signature = node.getSignatureAlgorithmForRequests();
+                keys = signature.getKeyPair();
+                publicKey = Base64.getEncoder().encodeToString(keys.getPublic().getEncoded());
+                manifest = node.getManifest();
+                takamakaCode = node.getTakamakaCode();
+                chainId = ((StringValue) node.runInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
+                        (manifest, _10_000, takamakaCode, CodeSignature.GET_CHAIN_ID, manifest))).value;
+                nonceHelper = new NonceHelper(node);
+                gasHelper = new GasHelper(node);
+                account = createAccount();
+                dumpKeysOfAccount();
+            }
         }
 
-        Path takamakaCodePath = Paths.get
-                ("modules/io-takamaka-code-1.0.0.jar");
-
-        Path familyPath = Paths.get("modules/family_exported-0.0.1-SNAPSHOT.jar");
-
-        try (Node node = TendermintBlockchain.init(config, consensus)) {
-            // 1) creo manifest e gamete
-            InitializedNode initialized = InitializedNode.of
-                    (node, consensus, takamakaCodePath, GREEN_AMOUNT, RED_AMOUNT);
-
-            // 2) the gamete andrà a pagare per la transazione con unità di "gas"
-            NodeWithJars nodeWithJars = NodeWithJars.of
-                    (node, initialized.gamete(), initialized.keysOfGamete().getPrivate(),
-                            familyPath);
-
-            // 3) Assegno delle "monete" agli account per poter pagare le transazioni
-            NodeWithAccounts nodeWithAccounts = NodeWithAccounts.of
-                    (node, initialized.gamete(), initialized.keysOfGamete().getPrivate(),
-                            BigInteger.valueOf(10_000_000), BigInteger.valueOf(20_000_000));
-
-            GasHelper gasHelper = new GasHelper(node);
-
-            // mittente: carico in blockchain
-            StorageReference personStorage = node.addConstructorCallTransaction
-                    (new ConstructorCallTransactionRequest(
-
-                            // request da parte del primo account
-                            SignedTransactionRequest.Signer.with(node.getSignatureAlgorithmForRequests(),
-                                    nodeWithAccounts.privateKey(0)),
-
-                            // il primo account paga la request
-                            nodeWithAccounts.account(0),
-
-                            ZERO,
-
-                            "",
-
-                            // gas usato per pagare la transazione
-                            BigInteger.valueOf(10_000),
-
-                            // il costo del gas per transazione
-                            panarea(gasHelper.getSafeGasPrice()),
-
-                            nodeWithJars.jar(0),
-
-                            // Person(String,int,int,int)
-                            new ConstructorSignature(PERSON, ClassType.STRING, INT, INT, INT),
-
-                            // parametri attuali
-                            new StringValue(person.getName()), new IntValue(person.getDay()),
-                            new IntValue(person.getMonth()), new IntValue(person.getYear())
-                    ));
-
-            StorageValue s = node.addInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest(
-
-                    // request da parte del secondo account per ottenere una response dalla blockchain
-                    SignedTransactionRequest.Signer.with(node.getSignatureAlgorithmForRequests(), nodeWithAccounts.privateKey(1)),
-
-                    // il primo account paga la response
-                    nodeWithAccounts.account(1),
-
-                    ZERO,
-
-                    "",
-
-                    // gas usato per pagare la transazione
-                    BigInteger.valueOf(10_000),
-
-                    // il costo del gas per transazione
-                    panarea(gasHelper.getSafeGasPrice()),
-
-                    nodeWithJars.jar(0),
-
-                    // chiamo il toString()
-                    new NonVoidMethodSignature(PERSON, "toString", ClassType.STRING),
-
-                    // ripongo la response in uno storage per usi futuri
-                    personStorage
-            ));
-
-            result = "Operazione terminata con successo. Account: " + s.toString() + " creato correttamente";
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        public String getOutcome() {
+            return account.toString();
         }
 
-        return result;
+        private void dumpKeysOfAccount() throws FileNotFoundException, IOException {
+            String fileName = dumpKeys(account, keys);
+            System.out.println("The keys of the account have been saved into the file " + fileName);
+        }
+
+        private StorageReference createAccount() throws Exception {
+            return "faucet".equalsIgnoreCase(payer) ? createAccountFromFaucet() : createAccountFromPayer();
+        }
+
+        private StorageReference createAccountFromFaucet() throws Exception {
+            System.out.println("Free account creation from faucet will succeed only if the gamete of the node supports an open unsigned faucet");
+
+            StorageReference gamete = (StorageReference) node.runInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
+                    (manifest, _10_000, takamakaCode, CodeSignature.GET_GAMETE, manifest));
+
+            return (StorageReference) node.addInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
+                    (Signer.with(signature, keys), gamete, nonceHelper.getNonceOf(gamete),
+                            chainId, _10_000, gasHelper.getSafeGasPrice(), takamakaCode,
+                            new NonVoidMethodSignature(ClassType.GAMETE, "faucet", ClassType.EOA, ClassType.BIG_INTEGER, ClassType.BIG_INTEGER, ClassType.STRING),
+                            gamete,
+                            new BigIntegerValue(balance), new BigIntegerValue(balanceRed), new StringValue(publicKey)));
+        }
+
+        private StorageReference createAccountFromPayer() throws Exception {
+            askForConfirmation();
+
+            StorageReference payer = new StorageReference(CreateAccount.this.payer);
+            KeyPair keysOfPayer = readKeys(payer);
+            Signer signer = Signer.with(signature, keysOfPayer);
+
+            StorageReference account = (StorageReference) node.addConstructorCallTransaction(new ConstructorCallTransactionRequest
+                    (signer, payer, nonceHelper.getNonceOf(payer),
+                            chainId, _10_000, gasHelper.getSafeGasPrice(), takamakaCode,
+                            new ConstructorSignature(ClassType.EOA, ClassType.BIG_INTEGER, ClassType.STRING),
+                            new BigIntegerValue(balance), new StringValue(publicKey)));
+
+            if (balanceRed.signum() > 0)
+                // we send the red coins if required
+                node.addInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
+                        (signer, payer, nonceHelper.getNonceOf(payer), chainId, _10_000, gasHelper.getSafeGasPrice(), takamakaCode,
+                                CodeSignature.RECEIVE_RED_BIG_INTEGER, account, new BigIntegerValue(balanceRed)));
+
+            return account;
+        }
+
+        private void askForConfirmation() {
+            if (!nonInteractive) {
+                int gas = balanceRed.signum() > 0 ? 20_000 : 10_000;
+                System.out.print("Do you really want to spend up to " + gas + " gas units to create a new account [Y/N] ");
+                String answer = System.console().readLine();
+                if (!"Y".equals(answer))
+                    throw new CommandException("stopped");
+            }
+        }
     }
 }
