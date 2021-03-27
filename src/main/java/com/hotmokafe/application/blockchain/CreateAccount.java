@@ -1,6 +1,7 @@
 package com.hotmokafe.application.blockchain;
 
 import com.hotmokafe.application.entities.Person;
+import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.requests.ConstructorCallTransactionRequest;
 import io.hotmoka.beans.requests.InstanceMethodCallTransactionRequest;
@@ -41,9 +42,9 @@ import static java.math.BigInteger.ZERO;
 public class CreateAccount extends AbstractCommand {
 
     //"the url of the node (without the protocol)"
-    private String url;
+    private String url = "ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080";
 
-    //"the reference to the account that pays for the creation, or the string \"faucet\""
+    //"the reference to the account that pays for the creation, or the string "faucet"
     private String payer;
 
     //"the initial balance of the account"
@@ -55,44 +56,27 @@ public class CreateAccount extends AbstractCommand {
     //"runs in non-interactive mode"
     private boolean nonInteractive;
 
-    public String getUrl() {
-        return url;
+    private CreateAccount() {
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public CreateAccount(String url, String payer, String balance, String balanceRed, boolean nonInteractive) throws CommandException {
+        try {
+            if (StringUtils.isValid(url) && StringUtils.isValid(payer)
+                    && StringUtils.isValid(balance) && StringUtils.isValid(balanceRed)) {
+                this.url = url;
+                this.payer = payer;
+                this.nonInteractive = nonInteractive;
+                this.balance = new BigInteger(balance);
+                this.balanceRed = new BigInteger(balanceRed);
+            } else
+                throw new CommandException(new IllegalArgumentException("Campi non valorizzati correttamente"));
+        } catch (NumberFormatException e) {
+            throw new CommandException(e);
+        }
     }
 
-    public String getPayer() {
-        return payer;
-    }
-
-    public void setPayer(String payer) {
-        this.payer = payer;
-    }
-
-    public BigInteger getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigInteger balance) {
-        this.balance = balance;
-    }
-
-    public BigInteger getBalanceRed() {
-        return balanceRed;
-    }
-
-    public void setBalanceRed(BigInteger balanceRed) {
-        this.balanceRed = balanceRed;
-    }
-
-    public boolean isNonInteractive() {
-        return nonInteractive;
-    }
-
-    public void setNonInteractive(boolean nonInteractive) {
-        this.nonInteractive = nonInteractive;
+    public CreateAccount(String payer, String balance, String balanceRed, boolean nonInteractive) {
+        this("ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080", payer, balance, balanceRed, nonInteractive);
     }
 
     @Override
@@ -139,7 +123,7 @@ public class CreateAccount extends AbstractCommand {
         }
 
         private StorageReference createAccount() throws Exception {
-            return "faucet".equals(payer) ? createAccountFromFaucet() : createAccountFromPayer();
+            return "faucet".equalsIgnoreCase(payer) ? createAccountFromFaucet() : createAccountFromPayer();
         }
 
         private StorageReference createAccountFromFaucet() throws Exception {

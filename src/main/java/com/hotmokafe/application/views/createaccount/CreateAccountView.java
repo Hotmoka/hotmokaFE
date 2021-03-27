@@ -1,9 +1,11 @@
 package com.hotmokafe.application.views.createaccount;
 
+import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.CreateAccount;
 import com.hotmokafe.application.entities.Person;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -32,31 +34,49 @@ public class CreateAccountView extends Div {
 
         layoutWithFormItems = new FormLayout();
 
-        TextField firstName = new TextField();
-        firstName.setPlaceholder("Nome");
-        firstName.setSizeFull();
+        TextField URLField = new TextField();
+        URLField.setSizeFull();
 
-        TextField lastName = new TextField();
-        lastName.setPlaceholder("Cognome");
-        lastName.setSizeFull();
+        Checkbox useDefaultURL = new Checkbox();
+        useDefaultURL.setValue(true);
 
-        DatePicker birthDate = new DatePicker();
-        birthDate.setSizeFull();
+        useDefaultURL.addValueChangeListener(e -> {
+           URLField.setEnabled(!useDefaultURL.getValue());
+        });
 
-        layoutWithFormItems.addFormItem(firstName, "Nome");
-        layoutWithFormItems.addFormItem(lastName, "Cognome");
+        URLField.setEnabled(false);
 
-        layoutWithFormItems.addFormItem(birthDate, "Data di nascita");
+        TextField payerField = new TextField();
+        //lastName.setPlaceholder("Cognome");
+        payerField.setSizeFull();
 
+        TextField balanceField = new TextField();
+        balanceField.setSizeFull();
+
+        TextField balanceRedField = new TextField();
+        balanceRedField.setSizeFull();
+
+        Checkbox nonInteractive = new Checkbox();
+
+        layoutWithFormItems.addFormItem(URLField, "URL");
+        layoutWithFormItems.addFormItem(useDefaultURL, "Use default URL");
+        layoutWithFormItems.addFormItem(payerField, "Payer");
+        layoutWithFormItems.addFormItem(balanceField, "Balance");
+        layoutWithFormItems.addFormItem(balanceRedField, "Balance Red");
+        layoutWithFormItems.addFormItem(nonInteractive, "Non interactive");
         mainLayout.add(layoutWithFormItems);
 
         button = new Button("Crea");
         button.addClickListener(e -> {
-
-            if (firstName.getValue().length() != 0 && lastName.getValue().length() != 0 && birthDate.getValue() != null){
-                new CreateAccount().run();
-                //Dialog dialog = new Dialog();
-                //dialog.open();
+            try{
+                if (useDefaultURL.getValue())
+                    new CreateAccount(payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue()).run();
+                else
+                    new CreateAccount(URLField.getValue(),payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue()).run();
+            } catch (CommandException exception){
+                Dialog dialog = new Dialog();
+                dialog.add(new Text("Errore eccezione generata: " +  exception.getCause().getMessage()));
+                dialog.open();
             }
         });
 
