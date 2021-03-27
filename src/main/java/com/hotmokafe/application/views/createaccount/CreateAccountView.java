@@ -3,6 +3,8 @@ package com.hotmokafe.application.views.createaccount;
 import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.CreateAccount;
 import com.hotmokafe.application.entities.Person;
+import com.hotmokafe.application.utils.Kernel;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -10,6 +12,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -19,6 +22,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.component.dependency.CssImport;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
 @Route(value = "about", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
@@ -61,7 +65,9 @@ public class CreateAccountView extends Div {
         layoutWithFormItems.addFormItem(URLField, "URL");
         layoutWithFormItems.addFormItem(useDefaultURL, "Use default URL");
         layoutWithFormItems.addFormItem(payerField, "Payer");
+        layoutWithFormItems.addFormItem(new Span(), "");
         layoutWithFormItems.addFormItem(balanceField, "Balance");
+        layoutWithFormItems.addFormItem(new Span(), "");
         layoutWithFormItems.addFormItem(balanceRedField, "Balance Red");
         layoutWithFormItems.addFormItem(nonInteractive, "Non interactive");
         mainLayout.add(layoutWithFormItems);
@@ -76,6 +82,7 @@ public class CreateAccountView extends Div {
                 else
                     (create = new CreateAccount(URLField.getValue(),payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue())).run();
 
+                Kernel.getInstance().getMainView().setAccountLogged(create.getOutcome());
                 dialog.add(new Text("A new account " + create.getOutcome() + " has been created"));
                 dialog.open();
             } catch (CommandException exception){

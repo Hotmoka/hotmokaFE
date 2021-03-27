@@ -2,8 +2,10 @@ package com.hotmokafe.application.views.main;
 
 import java.util.Optional;
 
+import com.hotmokafe.application.utils.Kernel;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -33,11 +35,22 @@ public class MainView extends AppLayout {
     private final Tabs menu;
     private H1 viewTitle;
 
+    public Text getAccountLogged() {
+        return accountLogged;
+    }
+
+    public void setAccountLogged(String accountLogged) {
+        this.accountLogged.setText(accountLogged);
+    }
+
+    private Text accountLogged;
+
     public MainView() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
+        Kernel.getInstance().setMainView(this);
     }
 
     private Component createHeaderContent() {
@@ -50,7 +63,8 @@ public class MainView extends AppLayout {
         layout.add(new DrawerToggle());
         viewTitle = new H1();
         layout.add(viewTitle);
-        layout.add(new Avatar());
+        accountLogged = new Text("");
+        layout.add(new Avatar(), accountLogged);
         return layout;
     }
 
