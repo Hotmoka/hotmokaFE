@@ -14,6 +14,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.component.dependency.CssImport;
 
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.util.Optional;
 
 @Route(value = "about", layout = MainView.class)
@@ -45,20 +47,19 @@ public class CreateAccountView extends Div {
         useDefaultURL.setValue(true);
 
         useDefaultURL.addValueChangeListener(e -> {
-           URLField.setEnabled(!useDefaultURL.getValue());
+            URLField.setEnabled(!useDefaultURL.getValue());
         });
 
         URLField.setEnabled(false);
 
         TextField payerField = new TextField();
-        //lastName.setPlaceholder("Cognome");
         payerField.setSizeFull();
+        payerField.setValue("faucet");
 
-        TextField balanceField = new TextField();
+        NumberField balanceField = new NumberField();
         balanceField.setSizeFull();
+        balanceField.setValue((double) 1000000);
 
-        TextField balanceRedField = new TextField();
-        balanceRedField.setSizeFull();
 
         Checkbox nonInteractive = new Checkbox();
 
@@ -68,7 +69,6 @@ public class CreateAccountView extends Div {
         layoutWithFormItems.addFormItem(new Span(), "");
         layoutWithFormItems.addFormItem(balanceField, "Balance");
         layoutWithFormItems.addFormItem(new Span(), "");
-        layoutWithFormItems.addFormItem(balanceRedField, "Balance Red");
         layoutWithFormItems.addFormItem(nonInteractive, "Non interactive");
         mainLayout.add(layoutWithFormItems);
 
@@ -76,17 +76,17 @@ public class CreateAccountView extends Div {
         button.addClickListener(e -> {
             CreateAccount create;
             Dialog dialog = new Dialog();
-            try{
+            try {
                 if (useDefaultURL.getValue())
-                    (create = new CreateAccount(payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue())).run();
+                    (create = new CreateAccount(payerField.getValue(), new DecimalFormat("#").format(balanceField.getValue()), nonInteractive.getValue())).run();
                 else
-                    (create = new CreateAccount(URLField.getValue(),payerField.getValue(), balanceField.getValue(), balanceRedField.getValue(), nonInteractive.getValue())).run();
+                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString(), nonInteractive.getValue())).run();
 
                 Kernel.getInstance().getMainView().setAccountLogged(create.getOutcome());
                 dialog.add(new Text("A new account " + create.getOutcome() + " has been created"));
                 dialog.open();
-            } catch (CommandException exception){
-                dialog.add(new Text("Errore eccezione generata: " +  exception.getCause().getMessage()));
+            } catch (CommandException exception) {
+                dialog.add(new Text("Errore eccezione generata: " + exception.getCause().getMessage()));
                 dialog.open();
             }
         });
@@ -95,5 +95,4 @@ public class CreateAccountView extends Div {
 
         add(mainLayout);
     }
-
 }

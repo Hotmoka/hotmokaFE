@@ -70,15 +70,15 @@ public class CreateAccount extends AbstractCommand {
         this.outcome = outcome;
     }
 
-    public CreateAccount(String url, String payer, String balance, String balanceRed, boolean nonInteractive) throws CommandException {
+    public CreateAccount(String url, String payer, String balance, boolean nonInteractive) throws CommandException {
         try {
             if (StringUtils.isValid(url) && StringUtils.isValid(payer)
-                    && StringUtils.isValid(balance) && StringUtils.isValid(balanceRed)) {
+                    && StringUtils.isValid(balance)) {
                 this.url = url;
                 this.payer = payer;
                 this.nonInteractive = nonInteractive;
                 this.balance = new BigInteger(balance);
-                this.balanceRed = new BigInteger(balanceRed);
+                this.balanceRed = BigInteger.ZERO;
             } else
                 throw new CommandException(new IllegalArgumentException("Campi non valorizzati correttamente"));
         } catch (NumberFormatException e) {
@@ -86,8 +86,8 @@ public class CreateAccount extends AbstractCommand {
         }
     }
 
-    public CreateAccount(String payer, String balance, String balanceRed, boolean nonInteractive) {
-        this("ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080", payer, balance, balanceRed, nonInteractive);
+    public CreateAccount(String payer, String balance, boolean nonInteractive) {
+        this("ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080", payer, balance,  nonInteractive);
     }
 
     @Override
