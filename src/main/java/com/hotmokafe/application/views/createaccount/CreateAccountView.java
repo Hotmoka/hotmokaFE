@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.Optional;
 
-@Route(value = "about", layout = MainView.class)
+@Route(value = "create-account", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Create Account")
 @CssImport("./views/about/about-view.css")
@@ -46,9 +46,7 @@ public class CreateAccountView extends Div {
         Checkbox useDefaultURL = new Checkbox();
         useDefaultURL.setValue(true);
 
-        useDefaultURL.addValueChangeListener(e -> {
-            URLField.setEnabled(!useDefaultURL.getValue());
-        });
+        useDefaultURL.addValueChangeListener(e -> URLField.setEnabled(!useDefaultURL.getValue()));
 
         URLField.setEnabled(false);
 
@@ -58,10 +56,11 @@ public class CreateAccountView extends Div {
 
         NumberField balanceField = new NumberField();
         balanceField.setSizeFull();
-        balanceField.setValue((double) 1000000);
+        balanceField.setValue(100.0);
 
-
-        Checkbox nonInteractive = new Checkbox();
+        NumberField balanceFieldRed = new NumberField();
+        balanceFieldRed.setSizeFull();
+        balanceFieldRed.setValue(0.0);
 
         layoutWithFormItems.addFormItem(URLField, "URL");
         layoutWithFormItems.addFormItem(useDefaultURL, "Use default URL");
@@ -69,18 +68,20 @@ public class CreateAccountView extends Div {
         layoutWithFormItems.addFormItem(new Span(), "");
         layoutWithFormItems.addFormItem(balanceField, "Balance");
         layoutWithFormItems.addFormItem(new Span(), "");
-        layoutWithFormItems.addFormItem(nonInteractive, "Non interactive");
+        layoutWithFormItems.addFormItem(balanceFieldRed, "Balance Red");
+        layoutWithFormItems.addFormItem(new Span(), "");
         mainLayout.add(layoutWithFormItems);
 
         button = new Button("Crea");
         button.addClickListener(e -> {
             CreateAccount create;
             Dialog dialog = new Dialog();
+            DecimalFormat format = new DecimalFormat("#");
             try {
                 if (useDefaultURL.getValue())
-                    (create = new CreateAccount(payerField.getValue(), new DecimalFormat("#").format(balanceField.getValue()), nonInteractive.getValue())).run();
+                    (create = new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue()))).run();
                 else
-                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString(), nonInteractive.getValue())).run();
+                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString())).run();
 
                 Kernel.getInstance().getMainView().setAccountLogged(create.getOutcome());
                 dialog.add(new Text("A new account " + create.getOutcome() + " has been created"));
