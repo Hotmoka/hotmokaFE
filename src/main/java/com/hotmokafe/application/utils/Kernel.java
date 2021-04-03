@@ -7,7 +7,7 @@ import com.vaadin.flow.component.Text;
 public class Kernel {
     private static Kernel instance = null;
 
-    private final Account accountLogged = new Account(); //= "12f2f64d26a859adb45b44723b25a68ca853f30a8f9bc70f10e3092e985fa3bb#0";
+    private final Account accountLogged = new Account();
     private String url = "ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080";
 
     //singleton

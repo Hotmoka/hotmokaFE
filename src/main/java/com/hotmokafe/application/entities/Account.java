@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
-    private String reference = "12f2f64d26a859adb45b44723b25a68ca853f30a8f9bc70f10e3092e985fa3bb#0";
+    private String reference;
     private final List<String> fileds = new ArrayList<>();
     private final List<String> inheritedFileds = new ArrayList<>();
     private final List<String> methods = new ArrayList<>();

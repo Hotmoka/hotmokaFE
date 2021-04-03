@@ -3,6 +3,7 @@ package com.hotmokafe.application.views.state;
 import com.hotmokafe.application.blockchain.State;
 import com.hotmokafe.application.entities.Account;
 import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.StringUtils;
 import com.hotmokafe.application.views.main.MainView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
@@ -21,12 +22,13 @@ import java.util.List;
 
 @Route(value = "state", layout = MainView.class)
 public class StateView extends Div {
-    FormLayout layout;
 
-    private void onCLickListener() {
+    private void viewState() {
         new State().run();
+
         Account a = Kernel.getInstance().getAccountLogged();
         long counter = 1;
+
         //fields
         VerticalLayout l = new VerticalLayout();
         for (String field : a.getFileds()){
@@ -39,7 +41,6 @@ public class StateView extends Div {
 
         Accordion acc = new Accordion();
         acc.add("Fields", l);
-        layout.add(acc);
 
         //fields inherited
         VerticalLayout l1 = new VerticalLayout();
@@ -101,13 +102,7 @@ public class StateView extends Div {
     }
 
     public StateView() {
-        layout = new FormLayout();
-
-        Button b = new Button("Get state");
-        b.addClickListener(e -> onCLickListener());
-        layout.add(b);
-        layout.add(new Span());
-        layout.setSizeFull();
-        add(layout);
+        if (StringUtils.isValid(Kernel.getInstance().getAccountLogged().getReference()))
+            viewState();
     }
 }
