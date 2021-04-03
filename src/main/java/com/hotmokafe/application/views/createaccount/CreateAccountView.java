@@ -2,13 +2,10 @@ package com.hotmokafe.application.views.createaccount;
 
 import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.CreateAccount;
-import com.hotmokafe.application.entities.Person;
 import com.hotmokafe.application.utils.Kernel;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -22,11 +19,9 @@ import com.hotmokafe.application.views.main.MainView;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.component.dependency.CssImport;
 
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
-import java.util.Optional;
 
-@Route(value = "about", layout = MainView.class)
+@Route(value = "create-account", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
 @PageTitle("Create Account")
 @CssImport("./views/about/about-view.css")
@@ -46,9 +41,7 @@ public class CreateAccountView extends Div {
         Checkbox useDefaultURL = new Checkbox();
         useDefaultURL.setValue(true);
 
-        useDefaultURL.addValueChangeListener(e -> {
-            URLField.setEnabled(!useDefaultURL.getValue());
-        });
+        useDefaultURL.addValueChangeListener(e -> URLField.setEnabled(!useDefaultURL.getValue()));
 
         URLField.setEnabled(false);
 
@@ -58,10 +51,11 @@ public class CreateAccountView extends Div {
 
         NumberField balanceField = new NumberField();
         balanceField.setSizeFull();
-        balanceField.setValue((double) 1000000);
+        balanceField.setValue(100.0);
 
-
-        Checkbox nonInteractive = new Checkbox();
+        NumberField balanceFieldRed = new NumberField();
+        balanceFieldRed.setSizeFull();
+        balanceFieldRed.setValue(0.0);
 
         layoutWithFormItems.addFormItem(URLField, "URL");
         layoutWithFormItems.addFormItem(useDefaultURL, "Use default URL");
@@ -69,24 +63,25 @@ public class CreateAccountView extends Div {
         layoutWithFormItems.addFormItem(new Span(), "");
         layoutWithFormItems.addFormItem(balanceField, "Balance");
         layoutWithFormItems.addFormItem(new Span(), "");
-        layoutWithFormItems.addFormItem(nonInteractive, "Non interactive");
+        layoutWithFormItems.addFormItem(balanceFieldRed, "Balance Red");
+        layoutWithFormItems.addFormItem(new Span(), "");
         mainLayout.add(layoutWithFormItems);
 
         button = new Button("Crea");
         button.addClickListener(e -> {
             CreateAccount create;
             Dialog dialog = new Dialog();
+            DecimalFormat format = new DecimalFormat("#");
             try {
                 if (useDefaultURL.getValue())
-                    (create = new CreateAccount(payerField.getValue(), new DecimalFormat("#").format(balanceField.getValue()), nonInteractive.getValue())).run();
+                    (create = new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue()))).run();
                 else
-                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString(), nonInteractive.getValue())).run();
+                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString())).run();
 
-                Kernel.getInstance().getMainView().setAccountLogged(create.getOutcome());
-                dialog.add(new Text("A new account " + create.getOutcome() + " has been created"));
+                dialog.add(new Text("A new account " + Kernel.getInstance().getAccountLogged().getReference() + " has been created"));
                 dialog.open();
             } catch (CommandException exception) {
-                dialog.add(new Text("Errore eccezione generata: " + exception.getCause().getMessage()));
+                dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));
                 dialog.open();
             }
         });

@@ -3,6 +3,7 @@ package com.hotmokafe.application.views.main;
 import java.util.Optional;
 
 import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.views.state.StateView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
@@ -35,22 +36,12 @@ public class MainView extends AppLayout {
     private final Tabs menu;
     private H1 viewTitle;
 
-    public Text getAccountLogged() {
-        return accountLogged;
-    }
-
-    public void setAccountLogged(String accountLogged) {
-        this.accountLogged.setText(accountLogged);
-    }
-
-    private Text accountLogged;
-
     public MainView() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
-        Kernel.getInstance().setMainView(this);
+        Kernel.getInstance();
     }
 
     private Component createHeaderContent() {
@@ -63,8 +54,6 @@ public class MainView extends AppLayout {
         layout.add(new DrawerToggle());
         viewTitle = new H1();
         layout.add(viewTitle);
-        accountLogged = new Text("");
-        layout.add(new Avatar(), accountLogged);
         return layout;
     }
 
@@ -94,7 +83,10 @@ public class MainView extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        return new Tab[]{createTab("Create Account", CreateAccountView.class)};
+        return new Tab[]{
+                createTab("Create Account", CreateAccountView.class),
+                createTab("State", StateView.class)
+        };
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget) {

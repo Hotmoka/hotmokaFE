@@ -1,6 +1,6 @@
 package com.hotmokafe.application.blockchain;
 
-import com.hotmokafe.application.entities.Person;
+import com.hotmokafe.application.utils.Kernel;
 import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.requests.ConstructorCallTransactionRequest;
@@ -13,30 +13,18 @@ import io.hotmoka.beans.signatures.NonVoidMethodSignature;
 import io.hotmoka.beans.types.ClassType;
 import io.hotmoka.beans.values.*;
 import io.hotmoka.crypto.SignatureAlgorithm;
-import io.hotmoka.nodes.ConsensusParams;
 import io.hotmoka.nodes.GasHelper;
 import io.hotmoka.nodes.Node;
 import io.hotmoka.nodes.NonceHelper;
-import io.hotmoka.nodes.views.InitializedNode;
-import io.hotmoka.nodes.views.NodeWithAccounts;
-import io.hotmoka.nodes.views.NodeWithJars;
 import io.hotmoka.remote.RemoteNode;
-import io.hotmoka.tendermint.TendermintBlockchain;
-import io.hotmoka.tendermint.TendermintBlockchainConfig;
 
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import static io.hotmoka.beans.Coin.panarea;
-import static io.hotmoka.beans.types.BasicTypes.INT;
-import static java.math.BigInteger.ZERO;
 
 
 public class CreateAccount extends AbstractCommand {
@@ -56,29 +44,18 @@ public class CreateAccount extends AbstractCommand {
     //"runs in non-interactive mode"
     private boolean nonInteractive;
 
-    //output
-    private String outcome;
-
     private CreateAccount() {
     }
 
-    public String getOutcome() {
-        return outcome;
-    }
-
-    public void setOutcome(String outcome) {
-        this.outcome = outcome;
-    }
-
-    public CreateAccount(String url, String payer, String balance, boolean nonInteractive) throws CommandException {
+    public CreateAccount(String url, String payer, String balance, String balanceRed) throws CommandException {
         try {
             if (StringUtils.isValid(url) && StringUtils.isValid(payer)
                     && StringUtils.isValid(balance)) {
                 this.url = url;
                 this.payer = payer;
-                this.nonInteractive = nonInteractive;
+                this.nonInteractive = !payer.equalsIgnoreCase("faucet");
                 this.balance = new BigInteger(balance);
-                this.balanceRed = BigInteger.ZERO;
+                this.balanceRed = new BigInteger(balanceRed);
             } else
                 throw new CommandException(new IllegalArgumentException("Campi non valorizzati correttamente"));
         } catch (NumberFormatException e) {
@@ -86,13 +63,14 @@ public class CreateAccount extends AbstractCommand {
         }
     }
 
-    public CreateAccount(String payer, String balance, boolean nonInteractive) {
-        this("ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080", payer, balance,  nonInteractive);
+    public CreateAccount(String payer, String balance, String balanceRed) {
+        this("ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080", payer, balance, balanceRed);
     }
 
     @Override
     protected void execute() throws Exception {
-        this.setOutcome(new Run().getOutcome());
+        Kernel.getInstance().setUrl(this.url);
+        Kernel.getInstance().getAccountLogged().setReference(new Run().getOutcome());
     }
 
     private class Run {
@@ -115,7 +93,7 @@ public class CreateAccount extends AbstractCommand {
                 manifest = node.getManifest();
                 takamakaCode = node.getTakamakaCode();
                 chainId = ((StringValue) node.runInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
-                        (manifest, _10_000, takamakaCode, CodeSignature.GET_CHAIN_ID, manifest))).value;
+                        (manifest, _100_000, takamakaCode, CodeSignature.GET_CHAIN_ID, manifest))).value;
                 nonceHelper = new NonceHelper(node);
                 gasHelper = new GasHelper(node);
                 account = createAccount();
@@ -127,7 +105,7 @@ public class CreateAccount extends AbstractCommand {
             return account.toString();
         }
 
-        private void dumpKeysOfAccount() throws FileNotFoundException, IOException {
+        private void dumpKeysOfAccount() throws IOException {
             String fileName = dumpKeys(account, keys);
             System.out.println("The keys of the account have been saved into the file " + fileName);
         }
@@ -140,11 +118,11 @@ public class CreateAccount extends AbstractCommand {
             System.out.println("Free account creation from faucet will succeed only if the gamete of the node supports an open unsigned faucet");
 
             StorageReference gamete = (StorageReference) node.runInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
-                    (manifest, _10_000, takamakaCode, CodeSignature.GET_GAMETE, manifest));
+                    (manifest, _100_000, takamakaCode, CodeSignature.GET_GAMETE, manifest));
 
             return (StorageReference) node.addInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
                     (Signer.with(signature, keys), gamete, nonceHelper.getNonceOf(gamete),
-                            chainId, _10_000, gasHelper.getSafeGasPrice(), takamakaCode,
+                            chainId, _100_000, gasHelper.getSafeGasPrice(), takamakaCode,
                             new NonVoidMethodSignature(ClassType.GAMETE, "faucet", ClassType.EOA, ClassType.BIG_INTEGER, ClassType.BIG_INTEGER, ClassType.STRING),
                             gamete,
                             new BigIntegerValue(balance), new BigIntegerValue(balanceRed), new StringValue(publicKey)));
@@ -157,16 +135,16 @@ public class CreateAccount extends AbstractCommand {
             KeyPair keysOfPayer = readKeys(payer);
             Signer signer = Signer.with(signature, keysOfPayer);
 
-            StorageReference account = (StorageReference) node.addConstructorCallTransaction(new ConstructorCallTransactionRequest
+            StorageReference account = node.addConstructorCallTransaction(new ConstructorCallTransactionRequest
                     (signer, payer, nonceHelper.getNonceOf(payer),
-                            chainId, _10_000, gasHelper.getSafeGasPrice(), takamakaCode,
+                            chainId, _100_000, gasHelper.getSafeGasPrice(), takamakaCode,
                             new ConstructorSignature(ClassType.EOA, ClassType.BIG_INTEGER, ClassType.STRING),
                             new BigIntegerValue(balance), new StringValue(publicKey)));
 
             if (balanceRed.signum() > 0)
                 // we send the red coins if required
                 node.addInstanceMethodCallTransaction(new InstanceMethodCallTransactionRequest
-                        (signer, payer, nonceHelper.getNonceOf(payer), chainId, _10_000, gasHelper.getSafeGasPrice(), takamakaCode,
+                        (signer, payer, nonceHelper.getNonceOf(payer), chainId, _100_000, gasHelper.getSafeGasPrice(), takamakaCode,
                                 CodeSignature.RECEIVE_RED_BIG_INTEGER, account, new BigIntegerValue(balanceRed)));
 
             return account;
@@ -174,7 +152,7 @@ public class CreateAccount extends AbstractCommand {
 
         private void askForConfirmation() {
             if (!nonInteractive) {
-                int gas = balanceRed.signum() > 0 ? 20_000 : 10_000;
+                int gas = balanceRed.signum() > 0 ? 200_000 : 100_000;
                 System.out.print("Do you really want to spend up to " + gas + " gas units to create a new account [Y/N] ");
                 String answer = System.console().readLine();
                 if (!"Y".equals(answer))
