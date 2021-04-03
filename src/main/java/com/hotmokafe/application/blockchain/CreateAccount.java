@@ -1,6 +1,5 @@
 package com.hotmokafe.application.blockchain;
 
-import com.hotmokafe.application.entities.Person;
 import com.hotmokafe.application.utils.Kernel;
 import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.TransactionReference;
@@ -14,30 +13,18 @@ import io.hotmoka.beans.signatures.NonVoidMethodSignature;
 import io.hotmoka.beans.types.ClassType;
 import io.hotmoka.beans.values.*;
 import io.hotmoka.crypto.SignatureAlgorithm;
-import io.hotmoka.nodes.ConsensusParams;
 import io.hotmoka.nodes.GasHelper;
 import io.hotmoka.nodes.Node;
 import io.hotmoka.nodes.NonceHelper;
-import io.hotmoka.nodes.views.InitializedNode;
-import io.hotmoka.nodes.views.NodeWithAccounts;
-import io.hotmoka.nodes.views.NodeWithJars;
 import io.hotmoka.remote.RemoteNode;
-import io.hotmoka.tendermint.TendermintBlockchain;
-import io.hotmoka.tendermint.TendermintBlockchainConfig;
 
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import static io.hotmoka.beans.Coin.panarea;
-import static io.hotmoka.beans.types.BasicTypes.INT;
-import static java.math.BigInteger.ZERO;
 
 
 public class CreateAccount extends AbstractCommand {
@@ -83,7 +70,7 @@ public class CreateAccount extends AbstractCommand {
     @Override
     protected void execute() throws Exception {
         Kernel.getInstance().setUrl(this.url);
-        Kernel.getInstance().setAccountLogged(new Run().getOutcome());
+        Kernel.getInstance().getAccountLogged().setReference(new Run().getOutcome());
     }
 
     private class Run {

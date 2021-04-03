@@ -41,7 +41,7 @@ class PrintAPI {
     }
 
     PrintAPI(Node node) throws ClassNotFoundException, TransactionRejectedException, TransactionException, CodeExecutionException {
-        this.updates = node.getState(new StorageReference(Kernel.getInstance().getAccountLogged())).sorted().toArray(Update[]::new);
+        this.updates = node.getState(new StorageReference(Kernel.getInstance().getAccountLogged().getReference())).sorted().toArray(Update[]::new);
         this.tag = getClassTag();
         TakamakaClassLoader classloader = new ClassLoaderHelper(node).classloaderFor(tag.jar);
         this.clazz = classloader.loadClass(tag.clazz.name);
@@ -55,6 +55,7 @@ class PrintAPI {
         printFieldsInherited();
         printConstructors();
         printMethods();
+        Kernel.getInstance().getAccountLogged().setInnerClass(output);
     }
 
     private void printFieldsInherited() {

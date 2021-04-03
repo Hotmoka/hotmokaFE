@@ -54,7 +54,6 @@ public class MainView extends AppLayout {
         layout.add(new DrawerToggle());
         viewTitle = new H1();
         layout.add(viewTitle);
-        layout.add(new Avatar(), new Text(Kernel.getInstance().getAccountLogged()));
         return layout;
     }
 

@@ -2,13 +2,10 @@ package com.hotmokafe.application.views.createaccount;
 
 import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.CreateAccount;
-import com.hotmokafe.application.entities.Person;
 import com.hotmokafe.application.utils.Kernel;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -22,9 +19,7 @@ import com.hotmokafe.application.views.main.MainView;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.component.dependency.CssImport;
 
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
-import java.util.Optional;
 
 @Route(value = "create-account", layout = MainView.class)
 @RouteAlias(value = "", layout = MainView.class)
@@ -83,10 +78,10 @@ public class CreateAccountView extends Div {
                 else
                     (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString())).run();
 
-                dialog.add(new Text("A new account " + Kernel.getInstance().getAccountLogged() + " has been created"));
+                dialog.add(new Text("A new account " + Kernel.getInstance().getAccountLogged().getReference() + " has been created"));
                 dialog.open();
             } catch (CommandException exception) {
-                dialog.add(new Text("Errore eccezione generata: " + exception.getCause().getMessage()));
+                dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));
                 dialog.open();
             }
         });
