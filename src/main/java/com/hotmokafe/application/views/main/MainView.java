@@ -36,22 +36,12 @@ public class MainView extends AppLayout {
     private final Tabs menu;
     private H1 viewTitle;
 
-    public Text getAccountLogged() {
-        return accountLogged;
-    }
-
-    public void setAccountLogged(String accountLogged) {
-        this.accountLogged.setText(accountLogged);
-    }
-
-    private Text accountLogged;
-
     public MainView() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
-        Kernel.getInstance().setMainView(this);
+        Kernel.getInstance();
     }
 
     private Component createHeaderContent() {
@@ -64,8 +54,7 @@ public class MainView extends AppLayout {
         layout.add(new DrawerToggle());
         viewTitle = new H1();
         layout.add(viewTitle);
-        accountLogged = new Text("");
-        layout.add(new Avatar(), accountLogged);
+        layout.add(new Avatar(), new Text(Kernel.getInstance().getAccountLogged()));
         return layout;
     }
 

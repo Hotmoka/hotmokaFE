@@ -83,8 +83,7 @@ public class CreateAccountView extends Div {
                 else
                     (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString())).run();
 
-                Kernel.getInstance().getMainView().setAccountLogged(create.getOutcome());
-                dialog.add(new Text("A new account " + create.getOutcome() + " has been created"));
+                dialog.add(new Text("A new account " + Kernel.getInstance().getAccountLogged() + " has been created"));
                 dialog.open();
             } catch (CommandException exception) {
                 dialog.add(new Text("Errore eccezione generata: " + exception.getCause().getMessage()));

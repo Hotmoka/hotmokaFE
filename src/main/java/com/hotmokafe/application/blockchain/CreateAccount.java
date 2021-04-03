@@ -1,6 +1,7 @@
 package com.hotmokafe.application.blockchain;
 
 import com.hotmokafe.application.entities.Person;
+import com.hotmokafe.application.utils.Kernel;
 import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.requests.ConstructorCallTransactionRequest;
@@ -56,18 +57,7 @@ public class CreateAccount extends AbstractCommand {
     //"runs in non-interactive mode"
     private boolean nonInteractive;
 
-    //output
-    private String outcome;
-
     private CreateAccount() {
-    }
-
-    public String getOutcome() {
-        return outcome;
-    }
-
-    public void setOutcome(String outcome) {
-        this.outcome = outcome;
     }
 
     public CreateAccount(String url, String payer, String balance, String balanceRed) throws CommandException {
@@ -92,7 +82,8 @@ public class CreateAccount extends AbstractCommand {
 
     @Override
     protected void execute() throws Exception {
-        this.setOutcome(new Run().getOutcome());
+        Kernel.getInstance().setUrl(this.url);
+        Kernel.getInstance().setAccountLogged(new Run().getOutcome());
     }
 
     private class Run {
