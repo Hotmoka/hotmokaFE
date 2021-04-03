@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,12 +56,9 @@ class PrintAPI {
         printFieldsInherited();
         printConstructors();
         printMethods();
-        Kernel.getInstance().getAccountLogged().setInnerClass(output);
     }
 
     private void printFieldsInherited() {
-        output.add("Fields inherited");
-
         Stream.of(updates)
                 .filter(update -> update instanceof UpdateOfField)
                 .map(update -> (UpdateOfField) update)
@@ -69,8 +67,6 @@ class PrintAPI {
     }
 
     private void printFieldsInClass() {
-        output.add("Fields");
-
         Stream.of(updates)
                 .filter(update -> update instanceof UpdateOfField)
                 .map(update -> (UpdateOfField) update)
@@ -80,9 +76,9 @@ class PrintAPI {
 
     private void printUpdate(UpdateOfField update) {
         if (tag.clazz.equals(update.field.definingClass))
-            output.add(ANSI_RESET + "  " + update.field.name + ":" + update.field.type + " = " + valueToPrint(update));
+            Kernel.getInstance().getAccountLogged().getFileds().add(update.field.name + ":" + update.field.type + " = " + valueToPrint(update));
         else
-            output.add(ANSI_CYAN + "\u25b2 " + update.field.name + ":" + update.field.type + " = " + valueToPrint(update) + ANSI_GREEN + " (inherited from " + update.field.definingClass + ")");
+            Kernel.getInstance().getAccountLogged().getInheritedFileds().add(update.field.name + ":" + update.field.type + " = " + valueToPrint(update) + " (inherited from " + update.field.definingClass + ")");
     }
 
     private String valueToPrint(UpdateOfField update) {
@@ -103,8 +99,6 @@ class PrintAPI {
         Comparator<Method> comparator = Comparator.comparing(Method::getName)
                 .thenComparing(Method::toString);
 
-        output.add("Methods");
-
         Method[] methods = clazz.getMethods();
         List<Method> defined = Stream.of(methods)
                 .sorted(comparator)
@@ -119,8 +113,6 @@ class PrintAPI {
                 .filter(method -> method.getDeclaringClass() != clazz)
                 .collect(Collectors.toList());
 
-        output.add("Inherited methods");
-
         for (Method method: inherited)
             printInheritedMethod(method);
     }
@@ -128,18 +120,15 @@ class PrintAPI {
     private void printConstructors() throws ClassNotFoundException {
         Constructor<?>[] constructors = clazz.getConstructors();
 
-        output.add("Contructors");
-
         for (Constructor<?> constructor: constructors)
             printConstructor(constructor);
     }
 
     private void printConstructor(Constructor<?> constructor) throws ClassNotFoundException {
         Class<?> clazz = constructor.getDeclaringClass();
-        output.add(ANSI_RESET + "  "
-                + annotationsAsString(constructor)
-                + constructor.toString().replace(clazz.getName() + "(", clazz.getSimpleName() + "(")
-                + (whiteListingWizard.whiteListingModelOf(constructor).isEmpty() ? (AbstractCommand.ANSI_RED + " \u274c") : ""));
+        Kernel.getInstance().getAccountLogged().getConstructors().add(
+                annotationsAsString(constructor)
+                + constructor.toString().replace(clazz.getName() + "(", clazz.getSimpleName() + "("));
     }
 
     private String annotationsAsString(Executable executable) {
@@ -155,22 +144,22 @@ class PrintAPI {
         if (result.isEmpty())
             return "";
         else
-            return AbstractCommand.ANSI_RED + result + ANSI_RESET + ' ';
+            return result;
     }
 
     private void printMethod(Method method) throws ClassNotFoundException {
-        output.add(ANSI_RESET + "  "
-                + annotationsAsString(method)
-                + method.toString().replace(method.getDeclaringClass().getName() + "." + method.getName(), method.getName())
-                + (whiteListingWizard.whiteListingModelOf(method).isEmpty() ? (AbstractCommand.ANSI_RED + " \u274c") : ""));
+        Kernel.getInstance().getAccountLogged().getMethods().add(
+                annotationsAsString(method)
+                + method.toString().replace(method.getDeclaringClass().getName() + "." + method.getName(), method.getName()
+                + (whiteListingWizard.whiteListingModelOf(method).isEmpty() ? (" \u274c") : "")));
     }
 
     private void printInheritedMethod(Method method) throws ClassNotFoundException {
         Class<?> definingClass = method.getDeclaringClass();
-        output.add(ANSI_CYAN + "\u25b2 "
-                + annotationsAsString(method) + ANSI_CYAN
-                + method.toString().replace(method.getDeclaringClass().getName() + "." + method.getName(), method.getName())
-                + ANSI_GREEN + " (inherited from " + definingClass.getName() + ")"
-                + (whiteListingWizard.whiteListingModelOf(method).isEmpty() ? (AbstractCommand.ANSI_RED + " \u274c") : ""));
+        Kernel.getInstance().getAccountLogged().getInheritedMethods().add(
+                annotationsAsString(method) +
+                        method.toString().replace(method.getDeclaringClass().getName() + "." + method.getName(), method.getName()) +
+                        " (inherited from " + definingClass.getName() + ")"
+                + (whiteListingWizard.whiteListingModelOf(method).isEmpty() ? (" \u274c") : ""));
     }
 }
