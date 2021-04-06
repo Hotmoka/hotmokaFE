@@ -5,17 +5,16 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.hotmokafe.application.entities.Account;
 import com.hotmokafe.application.utils.Kernel;
 import io.hotmoka.beans.CodeExecutionException;
 import io.hotmoka.beans.TransactionException;
 import io.hotmoka.beans.TransactionRejectedException;
-import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.updates.ClassTag;
 import io.hotmoka.beans.updates.Update;
 import io.hotmoka.beans.updates.UpdateOfField;
@@ -26,13 +25,12 @@ import io.takamaka.code.constants.Constants;
 import io.takamaka.code.verification.TakamakaClassLoader;
 import io.takamaka.code.whitelisting.WhiteListingWizard;
 
-import static com.hotmokafe.application.blockchain.AbstractCommand.*;
-
 class PrintAPI {
     private final Class<?> clazz;
     private final WhiteListingWizard whiteListingWizard;
     private final Update[] updates;
     private final ClassTag tag;
+    private Account account;
 
     //output
     private final List<String> output = new ArrayList<>();
@@ -42,7 +40,8 @@ class PrintAPI {
     }
 
     PrintAPI(Node node) throws ClassNotFoundException, TransactionRejectedException, TransactionException, CodeExecutionException {
-        this.updates = node.getState(new StorageReference(Kernel.getInstance().getAccountLogged().getReference())).sorted().toArray(Update[]::new);
+        account = new Account();
+        this.updates = node.getState(new StorageReference(Kernel.getInstance().getCurrentAccount().getReference())).sorted().toArray(Update[]::new);
         this.tag = getClassTag();
         TakamakaClassLoader classloader = new ClassLoaderHelper(node).classloaderFor(tag.jar);
         this.clazz = classloader.loadClass(tag.clazz.name);
@@ -56,6 +55,8 @@ class PrintAPI {
         printFieldsInherited();
         printConstructors();
         printMethods();
+
+        Kernel.getInstance().setCurrentAccount(account);
     }
 
     private void printFieldsInherited() {
@@ -76,9 +77,9 @@ class PrintAPI {
 
     private void printUpdate(UpdateOfField update) {
         if (tag.clazz.equals(update.field.definingClass))
-            Kernel.getInstance().getAccountLogged().getFileds().add(update.field.name + ":" + update.field.type + " = " + valueToPrint(update));
+            account.getFields().add(update.field.name + ":" + update.field.type + " = " + valueToPrint(update));
         else
-            Kernel.getInstance().getAccountLogged().getInheritedFileds().add(update.field.name + ":" + update.field.type + " = " + valueToPrint(update) + " (inherited from " + update.field.definingClass + ")");
+            account.getInheritedFileds().add(update.field.name + ":" + update.field.type + " = " + valueToPrint(update) + " (inherited from " + update.field.definingClass + ")");
     }
 
     private String valueToPrint(UpdateOfField update) {
@@ -124,9 +125,9 @@ class PrintAPI {
             printConstructor(constructor);
     }
 
-    private void printConstructor(Constructor<?> constructor) throws ClassNotFoundException {
+    private void printConstructor(Constructor<?> constructor) {
         Class<?> clazz = constructor.getDeclaringClass();
-        Kernel.getInstance().getAccountLogged().getConstructors().add(
+        account.getConstructors().add(
                 annotationsAsString(constructor)
                 + constructor.toString().replace(clazz.getName() + "(", clazz.getSimpleName() + "("));
     }
@@ -148,7 +149,7 @@ class PrintAPI {
     }
 
     private void printMethod(Method method) throws ClassNotFoundException {
-        Kernel.getInstance().getAccountLogged().getMethods().add(
+        account.getMethods().add(
                 annotationsAsString(method)
                 + method.toString().replace(method.getDeclaringClass().getName() + "." + method.getName(), method.getName()
                 + (whiteListingWizard.whiteListingModelOf(method).isEmpty() ? (" \u274c") : "")));
@@ -156,7 +157,7 @@ class PrintAPI {
 
     private void printInheritedMethod(Method method) throws ClassNotFoundException {
         Class<?> definingClass = method.getDeclaringClass();
-        Kernel.getInstance().getAccountLogged().getInheritedMethods().add(
+        account.getInheritedMethods().add(
                 annotationsAsString(method) +
                         method.toString().replace(method.getDeclaringClass().getName() + "." + method.getName(), method.getName()) +
                         " (inherited from " + definingClass.getName() + ")"

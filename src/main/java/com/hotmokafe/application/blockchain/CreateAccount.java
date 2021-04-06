@@ -70,7 +70,7 @@ public class CreateAccount extends AbstractCommand {
     @Override
     protected void execute() throws Exception {
         Kernel.getInstance().setUrl(this.url);
-        Kernel.getInstance().getAccountLogged().setReference(new Run().getOutcome());
+        Kernel.getInstance().getCurrentAccount().setReference(new Run().getOutcome());
     }
 
     private class Run {

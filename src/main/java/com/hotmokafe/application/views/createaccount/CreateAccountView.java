@@ -69,16 +69,15 @@ public class CreateAccountView extends Div {
 
         button = new Button("Crea");
         button.addClickListener(e -> {
-            CreateAccount create;
             Dialog dialog = new Dialog();
             DecimalFormat format = new DecimalFormat("#");
             try {
                 if (useDefaultURL.getValue())
-                    (create = new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue()))).run();
+                    new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
                 else
-                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString())).run();
+                    new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString()).run();
 
-                dialog.add(new Text("A new account " + Kernel.getInstance().getAccountLogged().getReference() + " has been created"));
+                dialog.add(new Text("A new account " + Kernel.getInstance().getCurrentAccount().getReference() + " has been created"));
                 dialog.open();
             } catch (CommandException exception) {
                 dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));

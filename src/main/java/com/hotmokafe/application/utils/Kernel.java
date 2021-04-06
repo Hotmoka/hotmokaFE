@@ -1,13 +1,11 @@
 package com.hotmokafe.application.utils;
 
 import com.hotmokafe.application.entities.Account;
-import com.hotmokafe.application.views.main.MainView;
-import com.vaadin.flow.component.Text;
 
 public class Kernel {
     private static Kernel instance = null;
 
-    private final Account accountLogged = new Account();
+    private Account currentAccount = new Account();
     private String url = "ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080";
 
     //singleton
@@ -20,8 +18,14 @@ public class Kernel {
 
     //extra
 
-    public Account getAccountLogged() {
-        return accountLogged;
+
+    public void setCurrentAccount(Account currentAccount) {
+        currentAccount.setReference(this.currentAccount.getReference());
+        this.currentAccount = currentAccount;
+    }
+
+    public Account getCurrentAccount() {
+        return currentAccount;
     }
 
     public String getUrl() {
