@@ -9,27 +9,25 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Route(value = "state", layout = MainView.class)
 public class StateView extends Div {
 
     private Accordion layoutBuilder(String summary, List<String> list){
-        long counter = 1;
+        ListItem[] items = new ListItem[list.size()];
 
-        //fields
-        VerticalLayout l = new VerticalLayout();
-        for (String field : list){
-            Label label = new Label();
-            label.add(new Text("" + counter++ + ") " + field));
-            l.add(label);
-        }
+        for(int i = 0; i < list.size(); i++)
+            items[i] = new ListItem(new Label(list.get(i)));
 
         Accordion acc = new Accordion();
-        acc.add(summary, l);
+        acc.add(summary, new OrderedList(items));
 
         return acc;
     }
