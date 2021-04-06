@@ -16,12 +16,14 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Route(value = "state", layout = MainView.class)
+@PageTitle("State")
 public class StateView extends Div {
     private FormLayout layout = new FormLayout();
     private TextField inputField = new TextField();

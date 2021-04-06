@@ -3,6 +3,7 @@ package com.hotmokafe.application.views.main;
 import java.util.Optional;
 
 import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.views.install.InstallView;
 import com.hotmokafe.application.views.state.StateView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -85,7 +86,8 @@ public class MainView extends AppLayout {
     private Component[] createMenuItems() {
         return new Tab[]{
                 createTab("Create Account", CreateAccountView.class),
-                createTab("State", StateView.class)
+                createTab("State", StateView.class),
+                createTab("Install", InstallView.class)
         };
     }
 
