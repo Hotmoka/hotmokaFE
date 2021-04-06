@@ -56,6 +56,7 @@ class PrintAPI {
         printConstructors();
         printMethods();
 
+        account.setReference(Kernel.getInstance().getCurrentAccount().getReference());
         Kernel.getInstance().setCurrentAccount(account);
     }
 

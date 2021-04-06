@@ -20,7 +20,6 @@ public class Kernel {
 
 
     public void setCurrentAccount(Account currentAccount) {
-        currentAccount.setReference(this.currentAccount.getReference());
         this.currentAccount = currentAccount;
     }
 
