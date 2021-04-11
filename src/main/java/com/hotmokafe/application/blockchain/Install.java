@@ -1,4 +1,7 @@
 package com.hotmokafe.application.blockchain;
+import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.ListUtils;
+import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.LocalTransactionReference;
 import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.requests.InstanceMethodCallTransactionRequest;
@@ -15,40 +18,58 @@ import io.hotmoka.remote.RemoteNode;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class Install extends AbstractCommand {
 
-    //"the url of the node (without the protocol)"
     private String url;
 
-    //the reference to the account that pays for the installation
     private String payer;
 
-    //the jar to install
-    private Path jar;
+    private byte[] jar;
 
-    //the references of the dependencies of the jar, already installed in the node (takamakaCode is automatically added)
     private List<String> libs;
 
-    //the classpath used to interpret the payer defaultValue = "takamakaCode"
     private String classpath;
 
-    //runs in non-interactive mode
     private boolean nonInteractive;
 
-    //the gas limit used for the installation, defaultValue = "heuristic"
     private String gasLimit;
+
+    //extra
+
+    private String outcome;
+
+    public Install(String url, String payer, byte[] jar, List<String> libs, String classpath, boolean nonInteractive, String gasLimit) {
+        this.url = StringUtils.isValid(url) ? url : Kernel.getInstance().getUrl();
+        this.payer = StringUtils.isValid(payer) ? payer : Kernel.getInstance().getCurrentAccount().getReference();
+
+        if(jar != null)
+            this.jar = jar;
+        else
+            throw new CommandException("The jar file is empty.");
+
+        this.libs = ListUtils.isValid(libs) ? libs : null;
+        this.classpath = StringUtils.isValid(classpath) ? classpath : "takamakaCode";
+        this.nonInteractive = nonInteractive;
+        this.gasLimit = StringUtils.isValid(gasLimit) ? gasLimit : "heuristic";
+    }
+
+    public String getOutcome() {
+        return outcome;
+    }
 
     @Override
     protected void execute() throws Exception {
-        new Run();
+        outcome = new Run().getOutcome();
     }
 
     private class Run {
         private final JarStoreTransactionRequest request;
+        private String outcome;
 
         private Run() throws Exception {
             try (Node node = RemoteNode.of(remoteNodeConfig(url))) {
@@ -59,7 +80,7 @@ public class Install extends AbstractCommand {
                         (manifest, _100_000, takamakaCode, CodeSignature.GET_CHAIN_ID, manifest))).value;
                 GasHelper gasHelper = new GasHelper(node);
                 NonceHelper nonceHelper = new NonceHelper(node);
-                byte[] bytes = Files.readAllBytes(jar);
+                //byte[] bytes = jar;
                 KeyPair keys = readKeys(payer);
                 TransactionReference[] dependencies;
                 if (libs != null)
@@ -68,7 +89,7 @@ public class Install extends AbstractCommand {
                 else
                     dependencies = new TransactionReference[] { takamakaCode };
 
-                BigInteger gas = "heuristic".equals(gasLimit) ? _100_000.add(BigInteger.valueOf(100).multiply(BigInteger.valueOf(bytes.length))) : new BigInteger(gasLimit);
+                BigInteger gas = "heuristic".equals(gasLimit) ? _100_000.add(BigInteger.valueOf(100).multiply(BigInteger.valueOf(jar.length))) : new BigInteger(gasLimit);
                 TransactionReference classpath = "takamakaCode".equals(Install.this.classpath) ?
                         takamakaCode : new LocalTransactionReference(Install.this.classpath);
 
@@ -82,17 +103,21 @@ public class Install extends AbstractCommand {
                         gas,
                         gasHelper.getGasPrice(),
                         classpath,
-                        bytes,
+                        jar,
                         dependencies);
 
                 try {
                     TransactionReference response = node.addJarStoreTransaction(request);
-                    System.out.println(jar + " has been installed at " + response);
+                    outcome =   "<%REPLACE%> has been installed at " + response.toString();
                 }
                 finally {
                     printCosts(node, request);
                 }
             }
+        }
+
+        public String getOutcome() {
+            return outcome;
         }
 
         private void askForConfirmation(BigInteger gas) {
