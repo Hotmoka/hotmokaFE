@@ -69,7 +69,7 @@ public class MainView extends AppLayout {
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         logoLayout.add(new Image("images/logo.png", "hotmokaFE logo"));
-        logoLayout.add(new H1("hotmokaFE"));
+        logoLayout.add(new H1("Hotmoka"));
         layout.add(logoLayout, menu);
         return layout;
     }
