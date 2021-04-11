@@ -46,6 +46,7 @@ public class StateView extends Div {
 
         Accordion acc = new Accordion();
         acc.add(summary, new OrderedList(items));
+        acc.close();
 
         return acc;
     }
