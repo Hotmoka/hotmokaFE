@@ -2,7 +2,7 @@ package com.hotmokafe.application.views.createaccount;
 
 import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.CreateAccount;
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -77,7 +77,7 @@ public class CreateAccountView extends Div {
                 else
                     new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString()).run();
 
-                dialog.add(new Text("A new account " + Kernel.getInstance().getCurrentAccount().getReference() + " has been created"));
+                dialog.add(new Text("A new account " + Store.getInstance().getCurrentAccount().getReference() + " has been created"));
                 dialog.open();
             } catch (CommandException exception) {
                 dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));

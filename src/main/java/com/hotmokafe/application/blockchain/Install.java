@@ -1,5 +1,5 @@
 package com.hotmokafe.application.blockchain;
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import com.hotmokafe.application.utils.ListUtils;
 import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.LocalTransactionReference;
@@ -16,9 +16,6 @@ import io.hotmoka.nodes.NonceHelper;
 import io.hotmoka.remote.RemoteNode;
 
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.util.List;
 import java.util.stream.Stream;
@@ -44,8 +41,8 @@ public class Install extends AbstractCommand {
     private String outcome;
 
     public Install(String url, String payer, byte[] jar, List<String> libs, String classpath, boolean nonInteractive, String gasLimit) {
-        this.url = StringUtils.isValid(url) ? url : Kernel.getInstance().getUrl();
-        this.payer = StringUtils.isValid(payer) ? payer : Kernel.getInstance().getCurrentAccount().getReference();
+        this.url = StringUtils.isValid(url) ? url : Store.getInstance().getUrl();
+        this.payer = StringUtils.isValid(payer) ? payer : Store.getInstance().getCurrentAccount().getReference();
 
         if(jar != null)
             this.jar = jar;
@@ -80,7 +77,6 @@ public class Install extends AbstractCommand {
                         (manifest, _100_000, takamakaCode, CodeSignature.GET_CHAIN_ID, manifest))).value;
                 GasHelper gasHelper = new GasHelper(node);
                 NonceHelper nonceHelper = new NonceHelper(node);
-                //byte[] bytes = jar;
                 KeyPair keys = readKeys(payer);
                 TransactionReference[] dependencies;
                 if (libs != null)

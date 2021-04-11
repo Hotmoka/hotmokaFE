@@ -2,11 +2,10 @@ package com.hotmokafe.application.views.state;
 
 import com.hotmokafe.application.blockchain.State;
 import com.hotmokafe.application.entities.Account;
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import com.hotmokafe.application.utils.StringUtils;
 import com.hotmokafe.application.views.main.MainView;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -19,7 +18,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Route(value = "state", layout = MainView.class)
@@ -55,7 +53,7 @@ public class StateView extends Div {
     private void viewState() {
         new State().run();
 
-        Account a = Kernel.getInstance().getCurrentAccount();
+        Account a = Store.getInstance().getCurrentAccount();
 
         Accordion main = new Accordion();
         main.add(a.getReference(), new VerticalLayout(
@@ -74,7 +72,7 @@ public class StateView extends Div {
         button.addClickListener(e -> {
             Account a = new Account();
             a.setReference(inputField.getValue());
-            Kernel.getInstance().setCurrentAccount(a);
+            Store.getInstance().setCurrentAccount(a);
             viewState();
         });
 
@@ -85,7 +83,7 @@ public class StateView extends Div {
 
         mainLayoutBuilder();
 
-        if (StringUtils.isValid(Kernel.getInstance().getCurrentAccount().getReference()))
+        if (StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference()))
             viewState();
     }
 }

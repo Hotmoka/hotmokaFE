@@ -2,19 +2,14 @@ package com.hotmokafe.application.views.install;
 
 import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.Install;
-import com.hotmokafe.application.blockchain.State;
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import com.hotmokafe.application.utils.StringUtils;
 import com.hotmokafe.application.views.main.MainView;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
@@ -24,7 +19,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,15 +34,15 @@ public class InstallView extends Div {
         libs = new ArrayList<>();
 
         TextField urlField = new TextField("URL");
-        urlField.setValue(Kernel.getInstance().getUrl());
+        urlField.setValue(Store.getInstance().getUrl());
         urlField.setSizeFull();
 
         TextField payerField = new TextField("Payer");
         payerField.setPlaceholder("Base 64 hash");
 
-        if (Kernel.getInstance().getCurrentAccount() != null &&
-                StringUtils.isValid(Kernel.getInstance().getCurrentAccount().getReference()))
-            payerField.setValue(Kernel.getInstance().getCurrentAccount().getReference());
+        if (Store.getInstance().getCurrentAccount() != null &&
+                StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference()))
+            payerField.setValue(Store.getInstance().getCurrentAccount().getReference());
 
         payerField.setSizeFull();
 
@@ -104,8 +98,8 @@ public class InstallView extends Div {
             }
         });
 
-        mainLayout.add(urlField, payerField, classPathField,
-                nonInteractive, gasLimitField, jarUpload, libsUpload, button);
+        mainLayout.add(urlField, payerField, nonInteractive,
+                classPathField, gasLimitField, jarUpload, libsUpload, button);
         add(mainLayout);
     }
 }

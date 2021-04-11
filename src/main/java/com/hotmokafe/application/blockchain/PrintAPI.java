@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.hotmokafe.application.entities.Account;
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import io.hotmoka.beans.CodeExecutionException;
 import io.hotmoka.beans.TransactionException;
 import io.hotmoka.beans.TransactionRejectedException;
@@ -41,7 +41,7 @@ class PrintAPI {
 
     PrintAPI(Node node) throws ClassNotFoundException, TransactionRejectedException, TransactionException, CodeExecutionException {
         account = new Account();
-        this.updates = node.getState(new StorageReference(Kernel.getInstance().getCurrentAccount().getReference())).sorted().toArray(Update[]::new);
+        this.updates = node.getState(new StorageReference(Store.getInstance().getCurrentAccount().getReference())).sorted().toArray(Update[]::new);
         this.tag = getClassTag();
         TakamakaClassLoader classloader = new ClassLoaderHelper(node).classloaderFor(tag.jar);
         this.clazz = classloader.loadClass(tag.clazz.name);
@@ -56,8 +56,8 @@ class PrintAPI {
         printConstructors();
         printMethods();
 
-        account.setReference(Kernel.getInstance().getCurrentAccount().getReference());
-        Kernel.getInstance().setCurrentAccount(account);
+        account.setReference(Store.getInstance().getCurrentAccount().getReference());
+        Store.getInstance().setCurrentAccount(account);
     }
 
     private void printFieldsInherited() {

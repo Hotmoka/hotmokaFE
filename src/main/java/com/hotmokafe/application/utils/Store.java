@@ -2,18 +2,18 @@ package com.hotmokafe.application.utils;
 
 import com.hotmokafe.application.entities.Account;
 
-public class Kernel {
-    private static Kernel instance = null;
+public class Store {
+    private static Store instance = null;
 
     private Account currentAccount = new Account();
     private String url = "ec2-54-194-239-91.eu-west-1.compute.amazonaws.com:8080";
 
     //singleton
 
-    private Kernel(){}
+    private Store(){}
 
-    public static Kernel getInstance(){
-        return instance == null ? instance = new Kernel() : instance;
+    public static Store getInstance(){
+        return instance == null ? instance = new Store() : instance;
     }
 
     //extra
