@@ -1,8 +1,6 @@
 package com.hotmokafe.application.blockchain;
 
-import java.util.stream.Stream;
-
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import io.hotmoka.beans.CodeExecutionException;
 import io.hotmoka.beans.TransactionException;
 import io.hotmoka.beans.TransactionRejectedException;
@@ -19,7 +17,7 @@ public class State extends AbstractCommand {
         private final Node node;
 
         private Run() throws Exception {
-            try (Node ignored = this.node = RemoteNode.of(remoteNodeConfig(Kernel.getInstance().getUrl()))) {
+            try (Node ignored = this.node = RemoteNode.of(remoteNodeConfig(Store.getInstance().getUrl()))) {
                 printAPI();
             }
         }

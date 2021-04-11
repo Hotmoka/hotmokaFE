@@ -2,14 +2,13 @@ package com.hotmokafe.application.views.main;
 
 import java.util.Optional;
 
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
+import com.hotmokafe.application.views.install.InstallView;
 import com.hotmokafe.application.views.state.StateView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -41,7 +40,7 @@ public class MainView extends AppLayout {
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
-        Kernel.getInstance();
+        Store.getInstance();
     }
 
     private Component createHeaderContent() {
@@ -68,7 +67,7 @@ public class MainView extends AppLayout {
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         logoLayout.add(new Image("images/logo.png", "hotmokaFE logo"));
-        logoLayout.add(new H1("hotmokaFE"));
+        logoLayout.add(new H1("Hotmoka"));
         layout.add(logoLayout, menu);
         return layout;
     }
@@ -85,7 +84,8 @@ public class MainView extends AppLayout {
     private Component[] createMenuItems() {
         return new Tab[]{
                 createTab("Create Account", CreateAccountView.class),
-                createTab("State", StateView.class)
+                createTab("State", StateView.class),
+                createTab("Install", InstallView.class)
         };
     }
 

@@ -1,6 +1,6 @@
 package com.hotmokafe.application.blockchain;
 
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
 import com.hotmokafe.application.utils.StringUtils;
 import io.hotmoka.beans.references.TransactionReference;
 import io.hotmoka.beans.requests.ConstructorCallTransactionRequest;
@@ -69,8 +69,8 @@ public class CreateAccount extends AbstractCommand {
 
     @Override
     protected void execute() throws Exception {
-        Kernel.getInstance().setUrl(this.url);
-        Kernel.getInstance().getAccountLogged().setReference(new Run().getOutcome());
+        Store.getInstance().setUrl(this.url);
+        Store.getInstance().getCurrentAccount().setReference(new Run().getOutcome());
     }
 
     private class Run {

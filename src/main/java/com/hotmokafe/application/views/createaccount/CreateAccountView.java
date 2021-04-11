@@ -2,7 +2,8 @@ package com.hotmokafe.application.views.createaccount;
 
 import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.CreateAccount;
-import com.hotmokafe.application.utils.Kernel;
+import com.hotmokafe.application.utils.Store;
+import com.hotmokafe.application.utils.StringUtils;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -27,58 +28,43 @@ import java.text.DecimalFormat;
 @CssImport("./views/about/about-view.css")
 public class CreateAccountView extends Div {
     private final VerticalLayout mainLayout;
-    private final FormLayout layoutWithFormItems;
+
     private final Button button;
 
     public CreateAccountView() {
         mainLayout = new VerticalLayout();
 
-        layoutWithFormItems = new FormLayout();
-
-        TextField URLField = new TextField();
+        TextField URLField = new TextField("URL");
+        URLField.setPlaceholder("The URL of the node");
+        URLField.setValue(Store.getInstance().getUrl());
         URLField.setSizeFull();
 
-        Checkbox useDefaultURL = new Checkbox();
-        useDefaultURL.setValue(true);
-
-        useDefaultURL.addValueChangeListener(e -> URLField.setEnabled(!useDefaultURL.getValue()));
-
-        URLField.setEnabled(false);
-
-        TextField payerField = new TextField();
+        TextField payerField = new TextField("Payer");
         payerField.setSizeFull();
         payerField.setValue("faucet");
 
-        NumberField balanceField = new NumberField();
+        Checkbox nonInteractive = new Checkbox("Non interactive");
+        nonInteractive.setValue(true);
+
+        NumberField balanceField = new NumberField("Balance");
         balanceField.setSizeFull();
         balanceField.setValue(100.0);
 
-        NumberField balanceFieldRed = new NumberField();
+        NumberField balanceFieldRed = new NumberField("Balance Red");
         balanceFieldRed.setSizeFull();
         balanceFieldRed.setValue(0.0);
 
-        layoutWithFormItems.addFormItem(URLField, "URL");
-        layoutWithFormItems.addFormItem(useDefaultURL, "Use default URL");
-        layoutWithFormItems.addFormItem(payerField, "Payer");
-        layoutWithFormItems.addFormItem(new Span(), "");
-        layoutWithFormItems.addFormItem(balanceField, "Balance");
-        layoutWithFormItems.addFormItem(new Span(), "");
-        layoutWithFormItems.addFormItem(balanceFieldRed, "Balance Red");
-        layoutWithFormItems.addFormItem(new Span(), "");
-        mainLayout.add(layoutWithFormItems);
-
         button = new Button("Crea");
         button.addClickListener(e -> {
-            CreateAccount create;
             Dialog dialog = new Dialog();
             DecimalFormat format = new DecimalFormat("#");
             try {
-                if (useDefaultURL.getValue())
-                    (create = new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue()))).run();
+                if (StringUtils.stringIsNUllOrEmpty(URLField.getValue()))
+                    new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
                 else
-                    (create = new CreateAccount(URLField.getValue(), payerField.getValue(), balanceField.getValue().toString())).run();
+                    new CreateAccount(URLField.getValue(), payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
 
-                dialog.add(new Text("A new account " + Kernel.getInstance().getAccountLogged().getReference() + " has been created"));
+                dialog.add(new Text("A new account " + Store.getInstance().getCurrentAccount().getReference() + " has been created"));
                 dialog.open();
             } catch (CommandException exception) {
                 dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));
@@ -86,7 +72,7 @@ public class CreateAccountView extends Div {
             }
         });
 
-        mainLayout.add(button);
+        mainLayout.add(URLField, payerField, nonInteractive, balanceField, balanceFieldRed, button);
 
         add(mainLayout);
     }
