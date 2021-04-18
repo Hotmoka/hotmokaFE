@@ -11,6 +11,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -28,50 +29,85 @@ import java.text.DecimalFormat;
 @CssImport("./views/about/about-view.css")
 public class CreateAccountView extends Div {
     private final VerticalLayout mainLayout;
+    private Dialog mainDialog = new Dialog();
+
+    private TextField URLField;
+    private TextField payerField;
+    private Checkbox nonInteractive;
+    private NumberField balanceField;
+    private NumberField balanceFieldRed;
 
     private final Button button;
+
+    private void call(){
+        Dialog dialog = new Dialog();
+        DecimalFormat format = new DecimalFormat("#");
+
+        try {
+            if (StringUtils.stringIsNUllOrEmpty(URLField.getValue()))
+                new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
+            else
+                new CreateAccount(URLField.getValue(), payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
+
+            dialog.add(new Text("A new account " + Store.getInstance().getCurrentAccount().getReference() + " has been created"));
+            dialog.open();
+        } catch (CommandException exception) {
+            dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));
+            dialog.open();
+        }
+    }
+
+    private void buildDialog() {
+        Button confirm = new Button("Confirm");
+        Button cancel = new Button("Cancel");
+
+        VerticalLayout layout = new VerticalLayout();
+
+        int gas = balanceFieldRed.getValue() > 0 ? 200_000 : 100_000;
+        layout.add(new Text("Do you really want to spend up to " + gas + " gas units to create a new account?"));
+
+        confirm.addClickListener(e -> {
+            mainDialog.close();
+            call();
+        });
+        cancel.addClickListener(e -> mainDialog.close());
+
+        layout.add(new HorizontalLayout(confirm, cancel));
+        mainDialog.add(layout);
+    }
 
     public CreateAccountView() {
         mainLayout = new VerticalLayout();
 
-        TextField URLField = new TextField("URL");
+        URLField = new TextField("URL");
         URLField.setPlaceholder("The URL of the node");
         URLField.setValue(Store.getInstance().getUrl());
         URLField.setSizeFull();
 
-        TextField payerField = new TextField("Payer");
+        payerField = new TextField("Payer");
         payerField.setSizeFull();
         payerField.setValue("faucet");
 
-        Checkbox nonInteractive = new Checkbox("Non interactive");
+        nonInteractive = new Checkbox("Non interactive");
         nonInteractive.setValue(true);
 
-        NumberField balanceField = new NumberField("Balance");
+        balanceField = new NumberField("Balance");
         balanceField.setSizeFull();
         balanceField.setValue(100.0);
 
-        NumberField balanceFieldRed = new NumberField("Balance Red");
+        balanceFieldRed = new NumberField("Balance Red");
         balanceFieldRed.setSizeFull();
         balanceFieldRed.setValue(0.0);
 
         button = new Button("Crea");
-        button.addClickListener(e -> {
-            Dialog dialog = new Dialog();
-            DecimalFormat format = new DecimalFormat("#");
-            try {
-                if (StringUtils.stringIsNUllOrEmpty(URLField.getValue()))
-                    new CreateAccount(payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
-                else
-                    new CreateAccount(URLField.getValue(), payerField.getValue(), format.format(balanceField.getValue()), format.format(balanceFieldRed.getValue())).run();
+        button.addClickListener(e ->{
+            if(!nonInteractive.getValue())
+                mainDialog.open();
+            else
+                call();
+        } );
 
-                dialog.add(new Text("A new account " + Store.getInstance().getCurrentAccount().getReference() + " has been created"));
-                dialog.open();
-            } catch (CommandException exception) {
-                dialog.add(new Text("Exception thrown: " + exception.getCause().getMessage()));
-                dialog.open();
-            }
-        });
-
+        buildDialog();
         mainLayout.add(URLField, payerField, nonInteractive, balanceField, balanceFieldRed, button);
 
         add(mainLayout);

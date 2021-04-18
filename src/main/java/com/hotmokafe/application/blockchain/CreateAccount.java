@@ -129,8 +129,6 @@ public class CreateAccount extends AbstractCommand {
         }
 
         private StorageReference createAccountFromPayer() throws Exception {
-            askForConfirmation();
-
             StorageReference payer = new StorageReference(CreateAccount.this.payer);
             KeyPair keysOfPayer = readKeys(payer);
             Signer signer = Signer.with(signature, keysOfPayer);
@@ -148,16 +146,6 @@ public class CreateAccount extends AbstractCommand {
                                 CodeSignature.RECEIVE_RED_BIG_INTEGER, account, new BigIntegerValue(balanceRed)));
 
             return account;
-        }
-
-        private void askForConfirmation() {
-            if (!nonInteractive) {
-                int gas = balanceRed.signum() > 0 ? 200_000 : 100_000;
-                System.out.print("Do you really want to spend up to " + gas + " gas units to create a new account [Y/N] ");
-                String answer = System.console().readLine();
-                if (!"Y".equals(answer))
-                    throw new CommandException("stopped");
-            }
         }
     }
 }
