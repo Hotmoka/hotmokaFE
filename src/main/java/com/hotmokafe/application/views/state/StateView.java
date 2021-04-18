@@ -46,7 +46,8 @@ public class StateView extends Div {
                 Button b = new Button(tokens[1].trim());
                 b.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 b.addClickListener(e -> {
-                    viewState(b.getText());
+                    inputField.setValue(b.getText());
+                    viewState();
                 });
 
                 items[list.indexOf(label)] = new ListItem(new Label(tokens[0] + "="), b);
@@ -76,9 +77,9 @@ public class StateView extends Div {
         return acc;
     }
 
-    private void viewState(String id) {
+    private void viewState() {
         Account a = new Account();
-        a.setReference(id);
+        a.setReference(inputField.getValue());
         Store.getInstance().setCurrentAccount(a);
 
         new State().run();
@@ -100,7 +101,7 @@ public class StateView extends Div {
 
     public StateView() {
         button.addClickListener(e -> {
-            viewState(inputField.getValue());
+            viewState();
         });
 
         button.setMaxHeight("10%");
@@ -110,9 +111,7 @@ public class StateView extends Div {
 
         mainLayoutBuilder();
 
-        String reference = Store.getInstance().getCurrentAccount().getReference();
-
-        if (StringUtils.isValid(reference))
-            viewState(reference);
+        if (StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference()))
+            viewState();
     }
 }
