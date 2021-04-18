@@ -5,20 +5,16 @@ import com.hotmokafe.application.entities.Account;
 import com.hotmokafe.application.utils.Store;
 import com.hotmokafe.application.utils.StringUtils;
 import com.hotmokafe.application.views.main.MainView;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
 import java.util.List;
 
 @Route(value = "state", layout = MainView.class)
@@ -46,9 +42,14 @@ public class StateView extends Div {
             if (label.contains("%STORAGE%")) {
                 String s = label.replace("%STORAGE%", "");
                 String[] tokens = s.split("=");
-                Anchor anchor = new Anchor("localhost:8080/state/" + tokens[1], tokens[1]);
 
-                items[list.indexOf(label)] = new ListItem(new Label(tokens[0] + "="), anchor);
+                Button b = new Button(tokens[1]);
+                b.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+                b.addClickListener(e -> {
+                    viewState(b.getText());
+                });
+
+                items[list.indexOf(label)] = new ListItem(new Label(tokens[0] + "="), b);
             } else {
                 items[list.indexOf(label)] = new ListItem(new Label(label));
             }
@@ -75,10 +76,14 @@ public class StateView extends Div {
         return acc;
     }
 
-    private void viewState() {
+    private void viewState(String id) {
+        Account a = new Account();
+        a.setReference(id);
+        Store.getInstance().setCurrentAccount(a);
+
         new State().run();
 
-        Account a = Store.getInstance().getCurrentAccount();
+        a = Store.getInstance().getCurrentAccount();
 
         Accordion main = new Accordion();
         main.add(a.getReference(), new VerticalLayout(
@@ -95,10 +100,7 @@ public class StateView extends Div {
 
     public StateView() {
         button.addClickListener(e -> {
-            Account a = new Account();
-            a.setReference(inputField.getValue());
-            Store.getInstance().setCurrentAccount(a);
-            viewState();
+            viewState(inputField.getValue());
         });
 
         button.setMaxHeight("10%");
@@ -108,7 +110,9 @@ public class StateView extends Div {
 
         mainLayoutBuilder();
 
-        if (StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference()))
-            viewState();
+        String reference = Store.getInstance().getCurrentAccount().getReference();
+
+        if (StringUtils.isValid(reference))
+            viewState(reference);
     }
 }
