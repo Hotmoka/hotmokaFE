@@ -111,7 +111,9 @@ public class StateView extends Div {
 
         mainLayoutBuilder();
 
-        if (StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference()))
+        if (StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference())){
+            inputField.setValue(Store.getInstance().getCurrentAccount().getReference());
             viewState();
+        }
     }
 }

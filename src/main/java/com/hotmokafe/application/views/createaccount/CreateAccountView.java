@@ -37,6 +37,8 @@ public class CreateAccountView extends Div {
     private NumberField balanceField;
     private NumberField balanceFieldRed;
 
+    private int gas;
+
     private final Button button;
 
     private void call(){
@@ -63,7 +65,6 @@ public class CreateAccountView extends Div {
 
         VerticalLayout layout = new VerticalLayout();
 
-        int gas = balanceFieldRed.getValue() > 0 ? 200_000 : 100_000;
         layout.add(new Text("Do you really want to spend up to " + gas + " gas units to create a new account?"));
 
         confirm.addClickListener(e -> {
@@ -101,13 +102,15 @@ public class CreateAccountView extends Div {
 
         button = new Button("Crea");
         button.addClickListener(e ->{
-            if(!nonInteractive.getValue())
+            if(!nonInteractive.getValue()){
+                gas = balanceFieldRed.getValue() > 0 ? 200_000 : 100_000;
+                buildDialog();
                 mainDialog.open();
+            }
             else
                 call();
         } );
 
-        buildDialog();
         mainLayout.add(URLField, payerField, nonInteractive, balanceField, balanceFieldRed, button);
 
         add(mainLayout);
