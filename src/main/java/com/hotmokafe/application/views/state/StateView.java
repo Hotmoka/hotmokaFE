@@ -40,10 +40,10 @@ public class StateView extends Div {
 
         for (String label : list) {
             if (label.contains("%STORAGE%")) {
-                String s = label.replace("%STORAGE%", "");
+                String s = label.split("%STORAGE%")[1];
                 String[] tokens = s.split("=");
 
-                Button b = new Button(tokens[1]);
+                Button b = new Button(tokens[1].trim());
                 b.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 b.addClickListener(e -> {
                     viewState(b.getText());
