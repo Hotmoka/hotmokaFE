@@ -10,6 +10,21 @@ public class Account {
     private List<String> methods = new ArrayList<>();
     private List<String> inheritedMethods = new ArrayList<>();
     private List<String> constructors = new ArrayList<>();
+    private List<String> storages = new ArrayList<>();
+
+    private void replace(List<String> list, int index){
+        String tmp = fields.get(index);
+        tmp = "%STORAGE%" + tmp;
+        list.set(index, tmp);
+    }
+
+    public void addStorage(String s ){
+        if (fields.contains(s)) {
+            replace(fields, fields.indexOf(s));
+        } else {
+            replace(inheritedFileds, inheritedFileds.indexOf(s));
+        }
+    }
 
     public String getReference() {
         return reference;
@@ -57,5 +72,9 @@ public class Account {
 
     public void setConstructors(List<String> constructors) {
         this.constructors = constructors;
+    }
+
+    public List<String> getStorages() {
+        return storages;
     }
 }
