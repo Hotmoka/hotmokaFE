@@ -87,22 +87,21 @@ public class StateView extends Div {
         a = Store.getInstance().getCurrentAccount();
 
         Accordion main = new Accordion();
-        main.add(a.getReference(), new VerticalLayout(
-                fieldsLayoutBuilder("Fields", a.getFields()),
-                fieldsLayoutBuilder("Inherited fields", a.getInheritedFileds()),
-                layoutBuilder("Constructors", a.getConstructors()),
-                layoutBuilder("Methods", a.getMethods()),
-                layoutBuilder("Inherited methods", a.getInheritedMethods())
-        ));
+        main.add(a.getReference() + ":" + Store.getInstance().getCurrentAccount().getTag().clazz,
+                new VerticalLayout(
+                        fieldsLayoutBuilder("Fields", a.getFields()),
+                        fieldsLayoutBuilder("Inherited fields", a.getInheritedFileds()),
+                        layoutBuilder("Constructors", a.getConstructors()),
+                        layoutBuilder("Methods", a.getMethods()),
+                        layoutBuilder("Inherited methods", a.getInheritedMethods())
+                ));
         main.setSizeFull();
 
         mainLayoutBuilder(main);
     }
 
     public StateView() {
-        button.addClickListener(e -> {
-            viewState();
-        });
+        button.addClickListener(e -> viewState());
 
         button.setMaxHeight("10%");
         button.setMaxWidth("10%");

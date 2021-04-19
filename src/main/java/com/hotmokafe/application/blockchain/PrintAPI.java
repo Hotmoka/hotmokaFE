@@ -55,6 +55,7 @@ class PrintAPI {
         printMethods();
 
         account.setReference(Store.getInstance().getCurrentAccount().getReference());
+        account.setTag(tag);
         Store.getInstance().setCurrentAccount(account);
     }
 
@@ -64,9 +65,7 @@ class PrintAPI {
         Stream.of(updates)
                 .filter(update -> update instanceof UpdateOfStorage)
                 .map(update -> (UpdateOfStorage) update)
-                .forEachOrdered(update -> {
-                    account.addStorage(update.field.name + ":" + update.field.type + " = " + valueToPrint(update));
-                });
+                .forEachOrdered(update -> account.addStorage(update.field.name + ":" + update.field.type + " = " + valueToPrint(update)));
     }
 
     private void printFieldsInherited() {
@@ -128,7 +127,7 @@ class PrintAPI {
             printInheritedMethod(method);
     }
 
-    private void printConstructors() throws ClassNotFoundException {
+    private void printConstructors() {
         Constructor<?>[] constructors = clazz.getConstructors();
 
         for (Constructor<?> constructor: constructors)
