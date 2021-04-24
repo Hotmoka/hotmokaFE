@@ -59,8 +59,6 @@ class PrintAPI {
         Store.getInstance().setCurrentAccount(account);
     }
 
-    //if UpdateOfStorage -> il campo value è una reference (puntatore)
-
     private void printStorage(){
         Stream.of(updates)
                 .filter(update -> update instanceof UpdateOfStorage)
