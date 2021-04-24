@@ -1,14 +1,17 @@
 package com.hotmokafe.application.views.state;
 
+import com.hotmokafe.application.blockchain.CommandException;
 import com.hotmokafe.application.blockchain.State;
 import com.hotmokafe.application.entities.Account;
 import com.hotmokafe.application.utils.Store;
 import com.hotmokafe.application.utils.StringUtils;
 import com.hotmokafe.application.views.main.MainView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -34,22 +37,29 @@ public class StateView extends Div {
 
         add(layout);
     }
-    
+
+    /**
+     * method used to build an accordion for displaying the account's fileds
+     * @param summary a text label used to identify the accordion
+     * @param list the list of fields to add in the accordion's body
+     * @return the accordion
+     */
     private Accordion fieldsLayoutBuilder(String summary, List<String> list) {
         ListItem[] items = new ListItem[list.size()];
 
         for (String label : list) {
-            if (label.contains("%STORAGE%")) {
-                String s = label.split("%STORAGE%")[1];
-                String[] tokens = s.split("=");
+            if (label.contains("%STORAGE%")) {  //the entry contains "%STORAGE%" ?
+                String s = label.split("%STORAGE%")[1]; //then subdivide the entry in two substring and take only the part that follows %STORAGE%
+                String[] tokens = s.split("="); //split again the string using the "=" as a point of reference
 
-                Button b = new Button(tokens[1].trim());
+                Button b = new Button(tokens[1].trim()); //add the r-value as the label of the button
                 b.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 b.addClickListener(e -> {
-                    inputField.setValue(b.getText());
-                    viewState();
+                    inputField.setValue(b.getText());   //when the button is clicked the main textfield will be set with the reference
+                    viewState();  // and a call to State will be triggered
                 });
 
+                //add the l-value (namely the field name and the type) and the button
                 items[list.indexOf(label)] = new ListItem(new Label(tokens[0] + "="), b);
             } else {
                 items[list.indexOf(label)] = new ListItem(new Label(label));
@@ -63,7 +73,13 @@ public class StateView extends Div {
 
         return acc;
     }
-    
+
+    /**
+     * method used to build an accordion for displaying the account's methods
+     * @param summary a text label used to identify the accordion
+     * @param list the list of fields to add in the accordion's body
+     * @return the accordion
+     */
     private Accordion layoutBuilder(String summary, List<String> list) {
         ListItem[] items = new ListItem[list.size()];
 
@@ -77,12 +93,21 @@ public class StateView extends Div {
         return acc;
     }
 
+    /**
+     * method used to trigger the blockchain "State" command
+     */
     private void viewState() {
         Account a = new Account();
         a.setReference(inputField.getValue());
         Store.getInstance().setCurrentAccount(a);
 
-        new State().run();
+        try{
+            new State().run();
+        } catch (CommandException e){
+            Dialog dialog = new Dialog();
+            dialog.add(new Text("Exception thrown: " + e.getCause().getMessage()));
+            dialog.open();
+        }
 
         a = Store.getInstance().getCurrentAccount();
 

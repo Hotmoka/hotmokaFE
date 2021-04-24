@@ -8,14 +8,15 @@ import com.hotmokafe.application.views.main.MainView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -28,24 +29,24 @@ import java.util.List;
 @PageTitle("Install")
 public class InstallView extends Div {
     private final VerticalLayout mainLayout;
-    private List<String> libs;
-    private String path2Jar;
-    private Dialog mainDialog = new Dialog();
+    private final List<String> libs;
+    private final Dialog mainDialog = new Dialog();
 
-    private TextField urlField;
-    private TextField payerField;
-    private Upload jarUpload;
-    private Upload libsUpload;
-    private MemoryBuffer buffer;
-    private MultiFileMemoryBuffer multiBuffer;
-    private TextField classPathField;
-    private Checkbox nonInteractive;
-    private TextField gasLimitField;
+    private final TextField urlField;
+    private final TextField payerField;
+    private final Upload jarUpload;
+    private final ComboBox<String> libsComboBOX;
+    private final MemoryBuffer buffer;
+    private final TextField classPathField;
+    private final Checkbox nonInteractive;
+    private final TextField gasLimitField;
 
     BigInteger gas;
 
+    /**
+     * Executes the blockchain "Install" command
+     */
     private void call(){
-        libs.addAll(multiBuffer.getFiles());
         Dialog dialog = new Dialog();
         try{
             if (StringUtils.isValid(urlField.getValue()) &&
@@ -55,6 +56,11 @@ public class InstallView extends Div {
                 Install install = new Install(
                         urlField.getValue(),
                         payerField.getValue(),
+                        //the main difference between the Install CLI is this byte array parameter.
+                        //Because we are using a server side rendering framework (Vaadin)
+                        //once the jar is uploaded no path is avaiable but only is data (byte).
+                        //Therfore, in order to use the jar, we must modify the blockchain
+                        // Install class so that it can operate on a byte array.
                         ((ByteArrayOutputStream)buffer.getFileData().getOutputBuffer()).toByteArray(),
                         libs,
                         classPathField.getValue(),
@@ -62,7 +68,12 @@ public class InstallView extends Div {
                         gasLimitField.getValue()
                 );
 
-                install.run();
+                try {
+                    install.run();
+                } catch(CommandException e){
+                    dialog.add(new Text("Exception thrown: " + e.getCause().getMessage()));
+                    dialog.open();
+                }
 
                 dialog.add(new Text(install.getOutcome().replace("<%REPLACE%>", buffer.getFileName())));
                 dialog.open();
@@ -73,6 +84,9 @@ public class InstallView extends Div {
         }
     }
 
+    /**
+     * Builds the confirm dialog
+     */
     private void buildDialog() {
         Button confirm = new Button("Confirm");
         Button cancel = new Button("Cancel");
@@ -104,7 +118,7 @@ public class InstallView extends Div {
         payerField.setPlaceholder("Base 64 hash");
 
         if (Store.getInstance().getCurrentAccount() != null &&
-                StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference()))
+                StringUtils.isValid(Store.getInstance().getCurrentAccount().getReference())) //initialize the field only if an account is in memory
             payerField.setValue(Store.getInstance().getCurrentAccount().getReference());
 
         payerField.setSizeFull();
@@ -114,12 +128,20 @@ public class InstallView extends Div {
         jarUpload.setUploadButton(new Button("Upload jar file"));
         jarUpload.setAcceptedFileTypes(".jar");
         jarUpload.setSizeFull();
+        jarUpload.setMaxWidth("98%");
 
-        multiBuffer = new MultiFileMemoryBuffer();
-        libsUpload = new Upload(multiBuffer);
-        libsUpload.setUploadButton(new Button("Add libraries"));
-        libsUpload.setAcceptedFileTypes(".jar");
-        libsUpload.setSizeFull();
+        libsComboBOX = new ComboBox<>("Libraries");
+        libsComboBOX.setAllowCustomValue(true);
+        libsComboBOX.setSizeFull();
+        libsComboBOX.addCustomValueSetListener(e -> {
+            if (!libs.contains(e.getDetail())) {
+                libs.add(e.getDetail());
+                libsComboBOX.setItems(libs);
+                new Notification(
+                        "Value " + e.getDetail() + " added", 3000).open();
+            }
+            libsComboBOX.setValue("");  //reset input value
+        });
 
         classPathField = new TextField("Classpath");
         classPathField.setSizeFull();
@@ -138,6 +160,7 @@ public class InstallView extends Div {
 
                 if("heuristic".equals(gasLimitField.getValue())){
                     if(buffer.getFileData() != null){
+                        //estimates the unit of gas that could be used for the transaction
                         gas = BigInteger.valueOf(100_000L).add(BigInteger.valueOf(100).multiply(
                                 BigInteger.valueOf(((ByteArrayOutputStream)buffer.getFileData().getOutputBuffer()).toByteArray().length)));
                     }
@@ -154,7 +177,7 @@ public class InstallView extends Div {
         });
 
         mainLayout.add(urlField, payerField, nonInteractive,
-                classPathField, gasLimitField, jarUpload, libsUpload, button);
+                classPathField, gasLimitField, jarUpload, libsComboBOX, button);
         add(mainLayout);
     }
 }
