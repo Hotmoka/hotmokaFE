@@ -81,6 +81,10 @@ public class MainView extends AppLayout {
         return tabs;
     }
 
+    /**
+     * In orther to display a new View, the class which represents that view must be added in the following array
+     * @return the list of views
+     */
     private Component[] createMenuItems() {
         return new Tab[]{
                 createTab("Create Account", CreateAccountView.class),

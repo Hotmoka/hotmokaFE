@@ -89,8 +89,6 @@ public class Install extends AbstractCommand {
                 TransactionReference classpath = "takamakaCode".equals(Install.this.classpath) ?
                         takamakaCode : new LocalTransactionReference(Install.this.classpath);
 
-                askForConfirmation(gas);
-
                 this.request = new JarStoreTransactionRequest(
                         SignedTransactionRequest.Signer.with(node.getSignatureAlgorithmForRequests(), keys),
                         payer,
@@ -114,15 +112,6 @@ public class Install extends AbstractCommand {
 
         public String getOutcome() {
             return outcome;
-        }
-
-        private void askForConfirmation(BigInteger gas) {
-            if (!nonInteractive) {
-                System.out.print("Do you really want to spend up to " + gas + " gas units to install the jar [Y/N] ");
-                String answer = System.console().readLine();
-                if (!"Y".equals(answer))
-                    throw new CommandException("stopped");
-            }
         }
     }
 }

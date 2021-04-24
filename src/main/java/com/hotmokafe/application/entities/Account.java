@@ -1,15 +1,33 @@
 package com.hotmokafe.application.entities;
 
+import io.hotmoka.beans.updates.ClassTag;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
     private String reference;
+    private ClassTag tag;
     private List<String> fields = new ArrayList<>();
     private List<String> inheritedFileds = new ArrayList<>();
     private List<String> methods = new ArrayList<>();
     private List<String> inheritedMethods = new ArrayList<>();
     private List<String> constructors = new ArrayList<>();
+    private List<String> storages = new ArrayList<>();
+
+    private void replace(List<String> list, int index){
+        String tmp = fields.get(index);
+        tmp = "%STORAGE%" + tmp;
+        list.set(index, tmp);
+    }
+
+    public void addStorage(String s ){
+        if (fields.contains(s)) {
+            replace(fields, fields.indexOf(s));
+        } else {
+            replace(inheritedFileds, inheritedFileds.indexOf(s));
+        }
+    }
 
     public String getReference() {
         return reference;
@@ -57,5 +75,17 @@ public class Account {
 
     public void setConstructors(List<String> constructors) {
         this.constructors = constructors;
+    }
+
+    public List<String> getStorages() {
+        return storages;
+    }
+
+    public ClassTag getTag() {
+        return tag;
+    }
+
+    public void setTag(ClassTag tag) {
+        this.tag = tag;
     }
 }

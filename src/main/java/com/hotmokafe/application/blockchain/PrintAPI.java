@@ -15,10 +15,7 @@ import com.hotmokafe.application.utils.Store;
 import io.hotmoka.beans.CodeExecutionException;
 import io.hotmoka.beans.TransactionException;
 import io.hotmoka.beans.TransactionRejectedException;
-import io.hotmoka.beans.updates.ClassTag;
-import io.hotmoka.beans.updates.Update;
-import io.hotmoka.beans.updates.UpdateOfField;
-import io.hotmoka.beans.updates.UpdateOfString;
+import io.hotmoka.beans.updates.*;
 import io.hotmoka.beans.values.StorageReference;
 import io.hotmoka.nodes.Node;
 import io.takamaka.code.constants.Constants;
@@ -53,11 +50,20 @@ class PrintAPI {
     private void print() throws ClassNotFoundException {
         printFieldsInClass();
         printFieldsInherited();
+        printStorage();
         printConstructors();
         printMethods();
 
         account.setReference(Store.getInstance().getCurrentAccount().getReference());
+        account.setTag(tag);
         Store.getInstance().setCurrentAccount(account);
+    }
+
+    private void printStorage(){
+        Stream.of(updates)
+                .filter(update -> update instanceof UpdateOfStorage)
+                .map(update -> (UpdateOfStorage) update)
+                .forEachOrdered(update -> account.addStorage(update.field.name + ":" + update.field.type + " = " + valueToPrint(update)));
     }
 
     private void printFieldsInherited() {
@@ -119,7 +125,7 @@ class PrintAPI {
             printInheritedMethod(method);
     }
 
-    private void printConstructors() throws ClassNotFoundException {
+    private void printConstructors() {
         Constructor<?>[] constructors = clazz.getConstructors();
 
         for (Constructor<?> constructor: constructors)
