@@ -13,6 +13,7 @@ import io.hotmoka.beans.signatures.NonVoidMethodSignature;
 import io.hotmoka.beans.types.ClassType;
 import io.hotmoka.beans.values.*;
 import io.hotmoka.crypto.SignatureAlgorithm;
+import io.hotmoka.crypto.SignatureAlgorithmForTransactionRequests;
 import io.hotmoka.nodes.GasHelper;
 import io.hotmoka.nodes.Node;
 import io.hotmoka.nodes.NonceHelper;
@@ -87,7 +88,7 @@ public class CreateAccount extends AbstractCommand {
 
         private Run() throws Exception {
             try (Node node = this.node = RemoteNode.of(remoteNodeConfig(url))) {
-                signature = node.getSignatureAlgorithmForRequests();
+                signature = SignatureAlgorithmForTransactionRequests.mk(node.getNameOfSignatureAlgorithmForRequests());
                 keys = signature.getKeyPair();
                 publicKey = Base64.getEncoder().encodeToString(keys.getPublic().getEncoded());
                 manifest = node.getManifest();

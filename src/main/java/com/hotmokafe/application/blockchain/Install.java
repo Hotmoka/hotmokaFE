@@ -10,6 +10,8 @@ import io.hotmoka.beans.requests.SignedTransactionRequest;
 import io.hotmoka.beans.signatures.CodeSignature;
 import io.hotmoka.beans.values.StorageReference;
 import io.hotmoka.beans.values.StringValue;
+import io.hotmoka.crypto.SignatureAlgorithm;
+import io.hotmoka.crypto.SignatureAlgorithmForTransactionRequests;
 import io.hotmoka.nodes.GasHelper;
 import io.hotmoka.nodes.Node;
 import io.hotmoka.nodes.NonceHelper;
@@ -89,8 +91,10 @@ public class Install extends AbstractCommand {
                 TransactionReference classpath = "takamakaCode".equals(Install.this.classpath) ?
                         takamakaCode : new LocalTransactionReference(Install.this.classpath);
 
+                SignatureAlgorithm<SignedTransactionRequest> signature = SignatureAlgorithmForTransactionRequests.mk(node.getNameOfSignatureAlgorithmForRequests());
+
                 this.request = new JarStoreTransactionRequest(
-                        SignedTransactionRequest.Signer.with(node.getSignatureAlgorithmForRequests(), keys),
+                        SignedTransactionRequest.Signer.with(signature, keys),
                         payer,
                         nonceHelper.getNonceOf(payer),
                         chainId,

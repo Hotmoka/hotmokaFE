@@ -112,7 +112,10 @@
             <artifactId>vaadin-avatar-flow</artifactId>
             <version>1.0.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.vaadin.artur</groupId>
             <artifactId>a-vaadin-helper</artifactId>
