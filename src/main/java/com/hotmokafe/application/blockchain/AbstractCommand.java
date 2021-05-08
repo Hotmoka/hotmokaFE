@@ -73,6 +73,37 @@ public abstract class AbstractCommand implements Runnable {
         return account.toString() + ".keys";
     }
 
+    protected BigInteger gasForCreatingAccountWithSignature(String signature, Node node) {
+        switch (signature) {
+            case "ed25519":
+            case "empty":
+                return _100_000;
+            case "sha256dsa":
+                return BigInteger.valueOf(200_000L);
+            case "qtesla1":
+                return BigInteger.valueOf(3_000_000L);
+            case "qtesla3":
+                return BigInteger.valueOf(6_000_000L);
+            default:
+                throw new IllegalArgumentException("unknown signature algorithm " + signature);
+        }
+    }
+
+    protected BigInteger gasForTransactionWhosePayerHasSignature(String signature, Node node) {
+        switch (signature) {
+            case "ed25519":
+            case "sha256dsa":
+            case "empty":
+                return _100_000;
+            case "qtesla1":
+                return BigInteger.valueOf(300_000L);
+            case "qtesla3":
+                return BigInteger.valueOf(400_000L);
+            default:
+                throw new IllegalArgumentException("unknown signature algorithm " + signature);
+        }
+    }
+
     protected void printCosts(Node node, TransactionRequest<?>... requests) {
         BigInteger forPenalty = BigInteger.ZERO;
         BigInteger forCPU = BigInteger.ZERO;
