@@ -1,5 +1,5 @@
 # hotmokaFE
-Frontend built with Vaadin framework for hotmoka blockchain
+Frontend made with Vaadin framework for hotmoka blockchain
 
 Setup
 ---
