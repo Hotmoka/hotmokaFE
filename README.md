@@ -9,7 +9,7 @@ What is hotmokaFE
 hotmokaFE (hotmoka Front-end) is an open source client to communicate with Hotmoka blockchain. <br />
 hotmokafe's goal is to make interaction with the blockchain simpler and more intuitive.
 
-Installation
+Quick Start
 ---
 Before running the app make sure that you have cloned the hotmoka parent project from [Hotmoka](https://github.com/Hotmoka/hotmoka) on your machine and you have run mvn install to install all the dependencies.
 
