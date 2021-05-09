@@ -6,7 +6,7 @@ Frontend made with Vaadin framework for hotmoka blockchain
 
 What is hotmokaFE
 ---
-hotmokaFE (hotmoka Front-end) is an open source client to communicate with Hotmoka blockchain.
+hotmokaFE (hotmoka Front-end) is an open source client to communicate with Hotmoka blockchain. <br />
 hotmokafe's goal is to make interaction with the blockchain simpler and more intuitive.
 
 Installation
@@ -15,5 +15,5 @@ Before running the app make sure that you have cloned the hotmoka parent project
 
 Docs
 ---
-Hotmoka: https://github.com/Hotmoka/hotmoka
+Hotmoka: https://github.com/Hotmoka/hotmoka <br />
 Vaadin: https://vaadin.com/docs/v14/
