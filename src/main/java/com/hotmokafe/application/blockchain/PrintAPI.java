@@ -17,10 +17,10 @@ import io.hotmoka.beans.TransactionException;
 import io.hotmoka.beans.TransactionRejectedException;
 import io.hotmoka.beans.updates.*;
 import io.hotmoka.beans.values.StorageReference;
+import io.hotmoka.constants.Constants;
 import io.hotmoka.nodes.Node;
-import io.takamaka.code.constants.Constants;
-import io.takamaka.code.verification.TakamakaClassLoader;
-import io.takamaka.code.whitelisting.WhiteListingWizard;
+import io.hotmoka.verification.TakamakaClassLoader;
+import io.hotmoka.whitelisting.WhiteListingWizard;
 
 class PrintAPI {
     private final Class<?> clazz;
